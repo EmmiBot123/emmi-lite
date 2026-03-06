@@ -44,15 +44,6 @@ class ESP32BlocklyApp {
         this.installedFirmwareVersion = this.getInstalledFirmwareVersion();
         this.latestFirmwareVersion = null;
         this.firmwareFlashInProgress = false;
-
-        // BLE Settings (NUS - Nordic UART Service)
-        this.BLE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-        this.BLE_TX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
-        this.BLE_RX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
-        this.bleDevice = null;
-        this.bleServer = null;
-        this.bleCharacteristic = null;
-
         this.init();
     }
 
@@ -1011,17 +1002,10 @@ class ESP32BlocklyApp {
                     connectBtn.classList.remove('connected');
                 }
             } else if (mode === 'BLE') {
-                if (this.bleDevice && this.bleDevice.gatt.connected) {
-                    connectLabel.textContent = 'Disconnect';
-                    connectIcon.className = 'fas fa-unlink';
-                    connectBtn.title = 'Disconnect Bluetooth';
-                    connectBtn.classList.add('connected');
-                } else {
-                    connectLabel.textContent = 'Connect BLE';
-                    connectIcon.className = 'fab fa-bluetooth-b';
-                    connectBtn.title = 'Connect via Bluetooth';
-                    connectBtn.classList.remove('connected');
-                }
+                connectLabel.textContent = 'Connect BLE';
+                connectIcon.className = 'fab fa-bluetooth-b';
+                connectBtn.title = 'Connect via Bluetooth';
+                connectBtn.classList.remove('connected');
             }
         }
     }
@@ -1062,8 +1046,7 @@ class ESP32BlocklyApp {
     }
 
     async checkUsbHealth() {
-        const mode = this.getSelectedBotMode();
-        if (mode !== 'USB' || !this.port || this.usbDisconnectInProgress) return;
+        if (!this.port || this.usbDisconnectInProgress) return;
 
         if (!this.isUsbActuallyConnected()) {
             await this.cleanupUsbConnection({
@@ -1266,23 +1249,11 @@ class ESP32BlocklyApp {
         }
 
         // Bot Mode Segmented Control
+        // Bot Mode Segmented Control
         document.querySelectorAll('input[name="bot-mode"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 if (e.target.checked) {
                     this.updateDynamicControls(e.target.value);
-                }
-            });
-        });
-
-        // Add explicit label click fallback to ensure mode changes
-        document.querySelectorAll('.bot-mode-segmented label').forEach(label => {
-            label.addEventListener('click', (e) => {
-                const radioId = label.getAttribute('for');
-                const radio = document.getElementById(radioId);
-                if (radio && !radio.checked) {
-                    console.log('Mode label clicked, forcing radio check:', radio.value);
-                    radio.checked = true;
-                    this.updateDynamicControls(radio.value);
                 }
             });
         });
@@ -1309,9 +1280,7 @@ class ESP32BlocklyApp {
 
         // Connect Button
         document.getElementById('btn_connect')?.addEventListener('click', async () => {
-            const mode = this.getSelectedBotMode();
-            console.log('Connect clicked, current mode:', mode);
-
+            const mode = document.querySelector('input[name="bot-mode"]:checked').value;
             if (mode === 'USB') {
                 if (this.port) {
                     await this.disconnectUSB();
@@ -1319,11 +1288,9 @@ class ESP32BlocklyApp {
                     await this.connectUSB();
                 }
             } else if (mode === 'BLE') {
-                if (this.bleDevice && this.bleDevice.gatt.connected) {
-                    await this.disconnectBLE();
-                } else {
-                    await this.connectBLE();
-                }
+                this.showToast('Scanning for BLE Devices...', 'info');
+                // Mock BLE connection
+                setTimeout(() => this.showToast('Connected to EMMI-BOT (BLE)', 'success'), 1500);
             }
         });
 
@@ -1338,11 +1305,6 @@ class ESP32BlocklyApp {
 
         // Firmware Update Button
         document.getElementById('btn_firmware')?.addEventListener('click', () => {
-            const mode = this.getSelectedBotMode();
-            if (mode !== 'USB') {
-                this.showToast('Firmware updates are only supported over USB.', 'warning');
-                return;
-            }
             this.showToast('Checking for Firmware Updates...', 'info');
             // Mock firmware check
             setTimeout(() => {
@@ -1374,29 +1336,8 @@ class ESP32BlocklyApp {
     async connectUSB() {
         if ('serial' in navigator) {
             try {
-                // 1. If there's an existing port object, try to clean it up first
-                if (this.port) {
-                    console.log('Cleaning up existing port before new connection...');
-                    try {
-                        this.keepReading = false;
-                        if (this.reader) await this.reader.cancel();
-                        if (this.port.readable || this.port.writable) await this.port.close();
-                    } catch (e) {
-                        console.warn('Pre-connection cleanup warning:', e);
-                    }
-                }
-
-                console.log('Requesting Serial Port...');
                 this.port = await navigator.serial.requestPort();
-
-                console.log('Opening Serial Port at 115200...');
-                await this.port.open({
-                    baudRate: 115200,
-                    dataBits: 8,
-                    stopBits: 1,
-                    parity: 'none',
-                    flowControl: 'none'
-                });
+                await this.port.open({ baudRate: 115200 });
 
                 this.showToast('USB Connected!', 'success');
                 this.updateUsbButtonState(true);
@@ -1405,108 +1346,19 @@ class ESP32BlocklyApp {
                 this.lastSerialRxAt = Date.now();
                 this.serialBuffer = '';
 
-                // 2. Start reading loop
+                // Start reading loop
                 this.keepReading = true;
                 this.readLoop();
-
-                // 3. Delay health monitor to let connection stabilize
-                setTimeout(() => {
-                    if (this.port) this.startUsbHealthMonitor();
-                }, 1000);
+                this.startUsbHealthMonitor();
 
             } catch (err) {
                 console.error('Serial Connection Error:', err);
                 this.port = null;
                 this.updateUsbButtonState(false);
-                if (err.name !== 'NotFoundError' && err.name !== 'SecurityError') {
-                    this.showToast('Failed to connect: ' + err.message, 'error');
-                }
+                this.showToast('Failed to connect: ' + err.message, 'error');
             }
         } else {
             this.showToast('Web Serial API not supported.', 'error');
-        }
-    }
-
-    async connectBLE() {
-        console.log('Checking Web Bluetooth support...');
-        console.log('navigator.bluetooth:', navigator.bluetooth);
-        console.log('isSecureContext:', window.isSecureContext);
-
-        if (!navigator.bluetooth) {
-            this.showToast('Web Bluetooth is not supported in this browser.', 'error');
-            return;
-        }
-
-        try {
-            this.showToast('Scanning for all Bluetooth devices...', 'info');
-
-            // Allow user to see all devices since filtering might miss the bot
-            this.bleDevice = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: [this.BLE_SERVICE_UUID]
-            });
-
-            this.showToast('Connecting to ' + this.bleDevice.name + '...', 'info');
-            this.bleDevice.addEventListener('gattserverdisconnected', () => this.handleBleDisconnect());
-
-            this.bleServer = await this.bleDevice.gatt.connect();
-            const service = await this.bleServer.getPrimaryService(this.BLE_SERVICE_UUID);
-            this.bleCharacteristic = await service.getCharacteristic(this.BLE_TX_UUID);
-
-            // Setup RX notifications
-            try {
-                const rxChar = await service.getCharacteristic(this.BLE_RX_UUID);
-                await rxChar.startNotifications();
-                rxChar.addEventListener('characteristicvaluechanged', (event) => {
-                    const value = new TextDecoder().decode(event.target.value);
-                    this.handleIncomingSerialText(value);
-                    this.writeToSerialMonitor(value);
-                });
-            } catch (err) {
-                console.warn('BLE RX notifications failed:', err);
-            }
-
-            this.showToast('Connected to ' + this.bleDevice.name + '!', 'success');
-            this.updateBleButtonState(true);
-        } catch (err) {
-            console.error('BLE Connection Error:', err);
-            this.bleDevice = null;
-            this.bleServer = null;
-            this.bleCharacteristic = null;
-            this.updateBleButtonState(false);
-            if (err.name !== 'NotFoundError') {
-                this.showToast('Failed to connect: ' + err.message, 'error');
-            }
-        }
-    }
-
-    async disconnectBLE() {
-        if (this.bleDevice && this.bleDevice.gatt.connected) {
-            this.bleDevice.gatt.disconnect();
-        }
-        this.handleBleDisconnect();
-    }
-
-    handleBleDisconnect() {
-        this.bleDevice = null;
-        this.bleServer = null;
-        this.bleCharacteristic = null;
-        this.updateBleButtonState(false);
-        this.showToast('Bluetooth Disconnected', 'info');
-    }
-
-    updateBleButtonState(isConnected) {
-        const btn = document.getElementById('btn_connect');
-        const label = document.getElementById('lbl_connect');
-        const icon = btn?.querySelector('i');
-
-        if (label) label.textContent = isConnected ? 'Disconnect' : 'Connect BLE';
-        if (btn) {
-            btn.classList.toggle('connected', isConnected);
-            btn.title = isConnected ? 'Disconnect Bluetooth' : 'Connect via Bluetooth';
-        }
-        if (icon) {
-            icon.className = isConnected ? 'fas fa-unlink' : 'fab fa-bluetooth-b';
         }
     }
 
@@ -1710,13 +1562,6 @@ class ESP32BlocklyApp {
             throw new Error('EMMI script is empty.');
         }
 
-        const mode = this.getSelectedBotMode();
-
-        if (mode === 'BLE') {
-            await this.sendEmmiScriptToBle(script);
-            return;
-        }
-
         if (!this.port) {
             await this.connectUSB();
         }
@@ -1738,33 +1583,6 @@ class ESP32BlocklyApp {
             throw new Error('Failed to send EMMI script: ' + err.message);
         } finally {
             writer.releaseLock();
-        }
-    }
-
-    async sendEmmiScriptToBle(script) {
-        if (!this.bleCharacteristic) {
-            await this.connectBLE();
-        }
-        if (!this.bleCharacteristic) {
-            throw new Error('Bluetooth not connected.');
-        }
-
-        try {
-            console.log('EMMI BLE TX:', script);
-            const encoder = new TextEncoder();
-            const data = encoder.encode(script + '\n');
-
-            // Send in chunks of 20 bytes
-            const MTU = 20;
-            for (let i = 0; i < data.byteLength; i += MTU) {
-                const chunk = data.slice(i, i + MTU);
-                await this.bleCharacteristic.writeValue(chunk);
-            }
-
-            this.writeToSerialMonitor('> EMMI BLE TX: ' + script + '\n');
-        } catch (err) {
-            console.error('EMMI BLE send failed:', err);
-            throw new Error('Failed to send EMMI script over Bluetooth: ' + err.message);
         }
     }
 
