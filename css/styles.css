@@ -779,8 +779,6 @@ g[data-id]>path[class*="blocklyPath"] {
     left: 3px;
     transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     box-shadow: 0 2px 8px rgba(15, 26, 46, 0.25);
-    pointer-events: none; /* Crucial: don't block clicks to labels */
-    z-index: 0;
 }
 
 #mode-usb:checked~.segmented-glider {
