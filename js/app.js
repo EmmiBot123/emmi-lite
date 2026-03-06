@@ -44,6 +44,15 @@ class ESP32BlocklyApp {
         this.installedFirmwareVersion = this.getInstalledFirmwareVersion();
         this.latestFirmwareVersion = null;
         this.firmwareFlashInProgress = false;
+
+        // BLE Settings (NUS - Nordic UART Service)
+        this.BLE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+        this.BLE_TX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // Characteristic to write to
+        this.BLE_RX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // Characteristic to read from
+        this.bleDevice = null;
+        this.bleServer = null;
+        this.bleCharacteristic = null;
+
         this.init();
     }
 
@@ -1002,10 +1011,17 @@ class ESP32BlocklyApp {
                     connectBtn.classList.remove('connected');
                 }
             } else if (mode === 'BLE') {
-                connectLabel.textContent = 'Connect BLE';
-                connectIcon.className = 'fab fa-bluetooth-b';
-                connectBtn.title = 'Connect via Bluetooth';
-                connectBtn.classList.remove('connected');
+                if (this.bleDevice && this.bleDevice.gatt.connected) {
+                    connectLabel.textContent = 'Disconnect';
+                    connectIcon.className = 'fas fa-unlink';
+                    connectBtn.title = 'Disconnect Bluetooth';
+                    connectBtn.classList.add('connected');
+                } else {
+                    connectLabel.textContent = 'Connect BLE';
+                    connectIcon.className = 'fab fa-bluetooth-b';
+                    connectBtn.title = 'Connect via Bluetooth';
+                    connectBtn.classList.remove('connected');
+                }
             }
         }
     }
@@ -1046,7 +1062,8 @@ class ESP32BlocklyApp {
     }
 
     async checkUsbHealth() {
-        if (!this.port || this.usbDisconnectInProgress) return;
+        const mode = this.getSelectedBotMode();
+        if (mode !== 'USB' || !this.port || this.usbDisconnectInProgress) return;
 
         if (!this.isUsbActuallyConnected()) {
             await this.cleanupUsbConnection({
@@ -1288,9 +1305,11 @@ class ESP32BlocklyApp {
                     await this.connectUSB();
                 }
             } else if (mode === 'BLE') {
-                this.showToast('Scanning for BLE Devices...', 'info');
-                // Mock BLE connection
-                setTimeout(() => this.showToast('Connected to EMMI-BOT (BLE)', 'success'), 1500);
+                if (this.bleDevice && this.bleDevice.gatt.connected) {
+                    await this.disconnectBLE();
+                } else {
+                    await this.connectBLE();
+                }
             }
         });
 
@@ -1305,6 +1324,11 @@ class ESP32BlocklyApp {
 
         // Firmware Update Button
         document.getElementById('btn_firmware')?.addEventListener('click', () => {
+            const mode = this.getSelectedBotMode();
+            if (mode !== 'USB') {
+                this.showToast('Firmware updates are only supported over USB.', 'warning');
+                return;
+            }
             this.showToast('Checking for Firmware Updates...', 'info');
             // Mock firmware check
             setTimeout(() => {
@@ -1359,6 +1383,83 @@ class ESP32BlocklyApp {
             }
         } else {
             this.showToast('Web Serial API not supported.', 'error');
+        }
+    }
+
+    async connectBLE() {
+        if (!navigator.bluetooth) {
+            this.showToast('Web Bluetooth is not supported in this browser.', 'error');
+            return;
+        }
+
+        try {
+            this.showToast('Scanning for EMMI Bot...', 'info');
+            this.bleDevice = await navigator.bluetooth.requestDevice({
+                filters: [{ namePrefix: 'EMMI' }, { namePrefix: 'ESP32' }],
+                optionalServices: [this.BLE_SERVICE_UUID]
+            });
+
+            this.showToast('Connecting to ' + this.bleDevice.name + '...', 'info');
+            this.bleDevice.addEventListener('gattserverdisconnected', () => this.handleBleDisconnect());
+
+            this.bleServer = await this.bleDevice.gatt.connect();
+            const service = await this.bleServer.getPrimaryService(this.BLE_SERVICE_UUID);
+            this.bleCharacteristic = await service.getCharacteristic(this.BLE_TX_UUID);
+
+            // Setup RX notifications if supported
+            try {
+                const rxChar = await service.getCharacteristic(this.BLE_RX_UUID);
+                await rxChar.startNotifications();
+                rxChar.addEventListener('characteristicvaluechanged', (event) => {
+                    const value = new TextDecoder().decode(event.target.value);
+                    this.handleIncomingSerialText(value);
+                    this.writeToSerialMonitor(value);
+                });
+            } catch (err) {
+                console.warn('BLE RX notifications not supported or failed to start:', err);
+            }
+
+            this.showToast('Connected to ' + this.bleDevice.name + '!', 'success');
+            this.updateBleButtonState(true);
+        } catch (err) {
+            console.error('BLE Connection Error:', err);
+            this.bleDevice = null;
+            this.bleServer = null;
+            this.bleCharacteristic = null;
+            this.updateBleButtonState(false);
+            if (err.name !== 'NotFoundError') {
+                this.showToast('Failed to connect: ' + err.message, 'error');
+            }
+        }
+    }
+
+    async disconnectBLE() {
+        if (this.bleDevice && this.bleDevice.gatt.connected) {
+            this.bleDevice.gatt.disconnect();
+        }
+        this.handleBleDisconnect();
+    }
+
+    handleBleDisconnect() {
+        this.bleDevice = null;
+        this.bleServer = null;
+        this.bleCharacteristic = null;
+        this.updateBleButtonState(false);
+        this.showToast('Bluetooth Disconnected', 'info');
+    }
+
+    updateBleButtonState(isConnected) {
+        const btn = document.getElementById('btn_connect');
+        const label = document.getElementById('lbl_connect');
+        const icon = btn?.querySelector('i');
+
+        if (label) label.textContent = isConnected ? 'Disconnect' : 'Connect BLE';
+        if (btn) {
+            btn.classList.toggle('connected', isConnected);
+            btn.title = isConnected ? 'Disconnect Bluetooth' : 'Connect via Bluetooth';
+        }
+        if (icon) {
+            icon.className = isConnected ? 'fas fa-unlink' : 'fab fa-bluetooth-b';
         }
     }
 
@@ -1523,27 +1624,49 @@ class ESP32BlocklyApp {
     }
 
     async sendSerial() {
-        if (!this.port || !this.port.writable) {
-            this.showToast('Not connected!', 'error');
-            return;
+        const mode = this.getSelectedBotMode();
+
+        if (mode === 'BLE') {
+            if (!this.bleCharacteristic) {
+                this.showToast('Not connected to BLE!', 'error');
+                return;
+            }
+        } else {
+            if (!this.port || !this.port.writable) {
+                this.showToast('Not connected to USB!', 'error');
+                return;
+            }
         }
 
         const input = document.getElementById('serial-input');
-        const text = input.value;
+        const text = input?.value;
         if (!text) return;
 
-        const writer = this.port.writable.getWriter();
         try {
-            const data = new TextEncoder().encode(text + '\n'); // Add newline
-            await writer.write(data);
-            input.value = '';
-            // Echo locally?
-            this.writeToSerialMonitor('> ' + text + '\n');
+            if (mode === 'BLE') {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(text + '\n');
+                // Chunks of 20 bytes for BLE
+                const MTU = 20;
+                for (let i = 0; i < data.byteLength; i += MTU) {
+                    const chunk = data.slice(i, i + MTU);
+                    await this.bleCharacteristic.writeValue(chunk);
+                }
+                this.writeToSerialMonitor('> BLE: ' + text + '\n');
+            } else {
+                const writer = this.port.writable.getWriter();
+                try {
+                    const data = new TextEncoder().encode(text + '\n');
+                    await writer.write(data);
+                    this.writeToSerialMonitor('> USB: ' + text + '\n');
+                } finally {
+                    writer.releaseLock();
+                }
+            }
+            if (input) input.value = '';
         } catch (err) {
             console.error('Write error:', err);
-            this.showToast('Failed to send', 'error');
-        } finally {
-            writer.releaseLock();
+            this.showToast('Failed to send: ' + err.message, 'error');
         }
     }
 
@@ -1560,6 +1683,13 @@ class ESP32BlocklyApp {
     async sendEmmiScriptToSerial(script) {
         if (!script || !script.trim()) {
             throw new Error('EMMI script is empty.');
+        }
+
+        const mode = this.getSelectedBotMode();
+
+        if (mode === 'BLE') {
+            await this.sendEmmiScriptToBle(script);
+            return;
         }
 
         if (!this.port) {
@@ -1583,6 +1713,33 @@ class ESP32BlocklyApp {
             throw new Error('Failed to send EMMI script: ' + err.message);
         } finally {
             writer.releaseLock();
+        }
+    }
+
+    async sendEmmiScriptToBle(script) {
+        if (!this.bleCharacteristic) {
+            await this.connectBLE();
+        }
+        if (!this.bleCharacteristic) {
+            throw new Error('Bluetooth not connected.');
+        }
+
+        try {
+            console.log('EMMI BLE TX:', script);
+            const encoder = new TextEncoder();
+            const data = encoder.encode(script + '\n');
+
+            // Send in chunks of 20 bytes (standard BLE MTU limit for some devices)
+            const MTU = 20;
+            for (let i = 0; i < data.byteLength; i += MTU) {
+                const chunk = data.slice(i, i + MTU);
+                await this.bleCharacteristic.writeValue(chunk);
+            }
+
+            this.writeToSerialMonitor('> EMMI BLE TX: ' + script + '\n');
+        } catch (err) {
+            console.error('EMMI BLE send failed:', err);
+            throw new Error('Failed to send EMMI script over Bluetooth: ' + err.message);
         }
     }
 
