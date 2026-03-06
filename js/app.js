@@ -44,6 +44,20 @@ class ESP32BlocklyApp {
         this.installedFirmwareVersion = this.getInstalledFirmwareVersion();
         this.latestFirmwareVersion = null;
         this.firmwareFlashInProgress = false;
+
+        // BLE state variables
+        this.bleDevice = null;
+        this.bleServer = null;
+        this.nusService = null;
+        this.txCharacteristic = null;
+        this.rxCharacteristic = null;
+        this.bleDisconnectInProgress = false;
+
+        // NUS UUIDs (Nordic UART Service)
+        this.NUS_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+        this.NUS_RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+        this.NUS_TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+
         this.init();
     }
 
@@ -990,7 +1004,7 @@ class ESP32BlocklyApp {
             connectBtn.style.display = 'flex';
 
             if (mode === 'USB') {
-                if (this.isUsbActuallyConnected()) {
+                if (this.port) {
                     connectLabel.textContent = 'Disconnect';
                     connectIcon.className = 'fas fa-unlink';
                     connectBtn.title = 'Disconnect USB Serial';
@@ -1002,10 +1016,17 @@ class ESP32BlocklyApp {
                     connectBtn.classList.remove('connected');
                 }
             } else if (mode === 'BLE') {
-                connectLabel.textContent = 'Connect BLE';
-                connectIcon.className = 'fab fa-bluetooth-b';
-                connectBtn.title = 'Connect via Bluetooth';
-                connectBtn.classList.remove('connected');
+                if (this.bleDevice && this.bleDevice.gatt.connected) {
+                    connectLabel.textContent = 'Disconnect';
+                    connectIcon.className = 'fas fa-unlink';
+                    connectBtn.title = 'Disconnect Bluetooth';
+                    connectBtn.classList.add('connected');
+                } else {
+                    connectLabel.textContent = 'Connect BLE';
+                    connectIcon.className = 'fab fa-bluetooth-b';
+                    connectBtn.title = 'Connect via Bluetooth';
+                    connectBtn.classList.remove('connected');
+                }
             }
         }
     }
@@ -1249,11 +1270,22 @@ class ESP32BlocklyApp {
         }
 
         // Bot Mode Segmented Control
-        // Bot Mode Segmented Control
         document.querySelectorAll('input[name="bot-mode"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 if (e.target.checked) {
                     this.updateDynamicControls(e.target.value);
+                }
+            });
+        });
+
+        // Add explicit label click fallback to ensure mode changes
+        document.querySelectorAll('.bot-mode-segmented label').forEach(label => {
+            label.addEventListener('click', (e) => {
+                const radioId = label.getAttribute('for');
+                const radio = document.getElementById(radioId);
+                if (radio && !radio.checked) {
+                    radio.checked = true;
+                    this.updateDynamicControls(radio.value);
                 }
             });
         });
@@ -1288,9 +1320,11 @@ class ESP32BlocklyApp {
                     await this.connectUSB();
                 }
             } else if (mode === 'BLE') {
-                this.showToast('Scanning for BLE Devices...', 'info');
-                // Mock BLE connection
-                setTimeout(() => this.showToast('Connected to EMMI-BOT (BLE)', 'success'), 1500);
+                if (this.bleDevice && this.bleDevice.gatt.connected) {
+                    await this.disconnectBLE();
+                } else {
+                    await this.connectBLE();
+                }
             }
         });
 
@@ -1378,6 +1412,109 @@ class ESP32BlocklyApp {
         } catch (err) {
             console.error('Error closing port:', err);
             this.showToast('Error disconnecting: ' + err.message, 'error');
+        }
+    }
+
+    async connectBLE() {
+        if (!navigator.bluetooth) {
+            this.showToast('Web Bluetooth API is not supported in this browser.', 'error');
+            return;
+        }
+
+        try {
+            this.showToast('Scanning for EMMI Bot...', 'info');
+
+            // Open scan for all devices to be as broad as possible
+            this.bleDevice = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [this.NUS_SERVICE_UUID]
+            });
+
+            this.showToast('Connecting to ' + (this.bleDevice.name || 'Bot') + '...', 'info');
+
+            this.bleDevice.addEventListener('gattserverdisconnected', () => this.handleBleDisconnect());
+
+            this.bleServer = await this.bleDevice.gatt.connect();
+            this.nusService = await this.bleServer.getPrimaryService(this.NUS_SERVICE_UUID);
+            this.rxCharacteristic = await this.nusService.getCharacteristic(this.NUS_RX_UUID);
+            this.txCharacteristic = await this.nusService.getCharacteristic(this.NUS_TX_UUID);
+
+            this.showToast('Bluetooth Connected!', 'success');
+            this.updateBleButtonState(true);
+
+        } catch (err) {
+            console.error('BLE Connection Error:', err);
+            this.showToast('BLE Error: ' + err.message, 'error');
+            this.bleDevice = null;
+            this.updateBleButtonState(false);
+        }
+    }
+
+    async disconnectBLE() {
+        if (!this.bleDevice) return;
+
+        this.bleDisconnectInProgress = true;
+        try {
+            if (this.bleDevice.gatt.connected) {
+                await this.bleDevice.gatt.disconnect();
+            }
+            this.showToast('Bluetooth Disconnected', 'info');
+        } catch (err) {
+            console.error('BLE Disconnect Error:', err);
+        } finally {
+            this.handleBleDisconnect();
+            this.bleDisconnectInProgress = false;
+        }
+    }
+
+    handleBleDisconnect() {
+        this.bleDevice = null;
+        this.bleServer = null;
+        this.nusService = null;
+        this.txCharacteristic = null;
+        this.rxCharacteristic = null;
+        this.updateBleButtonState(false);
+        if (!this.bleDisconnectInProgress) {
+            this.showToast('Bluetooth Connection Lost', 'warning');
+        }
+    }
+
+    updateBleButtonState(connected) {
+        const connectLabel = document.getElementById('lbl_connect');
+        const connectBtn = document.getElementById('btn_connect');
+        const connectIcon = connectBtn?.querySelector('i');
+
+        if (!connectLabel || !connectBtn || !connectIcon) return;
+
+        if (this.getSelectedBotMode() !== 'BLE') return;
+
+        if (connected) {
+            connectLabel.textContent = 'Disconnect';
+            connectIcon.className = 'fas fa-unlink';
+            connectBtn.title = 'Disconnect Bluetooth';
+            connectBtn.classList.add('connected');
+        } else {
+            connectLabel.textContent = 'Connect BLE';
+            connectIcon.className = 'fab fa-bluetooth-b';
+            connectBtn.title = 'Connect via Bluetooth';
+            connectBtn.classList.remove('connected');
+        }
+    }
+
+    async sendEmmiScriptToBLE(script) {
+        if (!this.rxCharacteristic) {
+            throw new Error('Bluetooth not connected');
+        }
+
+        const encoder = new TextEncoder();
+        const data = encoder.encode(script + '\n');
+
+        // MTU (Maximum Transmission Unit) for BLE is typically limited
+        // We split the data into 20-byte chunks for compatibility
+        const chunkSize = 20;
+        for (let i = 0; i < data.length; i += chunkSize) {
+            const chunk = data.slice(i, i + chunkSize);
+            await this.rxCharacteristic.writeValue(chunk);
         }
     }
 
@@ -1824,19 +1961,15 @@ class ESP32BlocklyApp {
                         persistent: true,
                         showClose: true
                     });
-                } else {
-                    this.showToast('Sending EMMI script...', 'info');
-                }
-
-                await this.sendEmmiScriptToSerial(generated.script);
-
-                if (mode === 'USB') {
+                    await this.sendEmmiScriptToSerial(generated.script);
                     await this.waitForUploadConfirmation();
                     this.showToast('Upload successful.', 'success', {
                         durationMs: 2000,
                         showClose: true
                     });
-                } else {
+                } else if (mode === 'BLE') {
+                    this.showToast('Sending via Bluetooth...', 'info');
+                    await this.sendEmmiScriptToBLE(generated.script);
                     this.showToast('EMMI script sent successfully.', 'success');
                 }
             }
