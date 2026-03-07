@@ -4,6 +4,11 @@
 // EMMI BOT V2 Blocks
 // ===========================================
 
+// Helper: safe Blockly.Msg lookup with fallback
+function _emmi_msg(key, fallback) {
+    return (typeof Blockly !== 'undefined' && Blockly.Msg && Blockly.Msg[key]) ? Blockly.Msg[key] : fallback;
+}
+
 // ===========================================
 // Eyes
 // ===========================================
@@ -11,16 +16,16 @@
 Blockly.Blocks['emmi_eyes_digital'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("digital write PIN")
+            .appendField(_emmi_msg('EMMI_DIGITAL_WRITE_PIN', 'digital write PIN'))
             .appendField(new Blockly.FieldDropdown([
-                ["Red", "PIN_EYE_RED"],
-                ["Green", "PIN_EYE_GREEN"],
-                ["Blue", "PIN_EYE_BLUE"]
+                [_emmi_msg('EMMI_COLOR_RED', 'Red'), 'PIN_EYE_RED'],
+                [_emmi_msg('EMMI_COLOR_GREEN', 'Green'), 'PIN_EYE_GREEN'],
+                [_emmi_msg('EMMI_COLOR_BLUE', 'Blue'), 'PIN_EYE_BLUE']
             ]), "PIN")
-            .appendField("to")
+            .appendField(_emmi_msg('EMMI_TO', 'to'))
             .appendField(new Blockly.FieldDropdown([
-                ["ON", "HIGH"],
-                ["OFF", "LOW"]
+                [_emmi_msg('EMMI_ON', 'ON'), "HIGH"],
+                [_emmi_msg('EMMI_OFF', 'OFF'), "LOW"]
             ]), "STATE");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
@@ -34,30 +39,17 @@ Blockly.Blocks['emmi_eyes_digital'] = {
 // Wheels
 // ===========================================
 
-Blockly.Blocks['emmi_wheels_init'] = {
-    init: function () {
-        this.appendDummyInput()
-            .appendField("🛞")
-            .appendField("wheels");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour("#3F51B5");
-        this.setTooltip("Initialize wheels.");
-        this.setHelpUrl("");
-    }
-};
-
 Blockly.Blocks['emmi_wheels_simple'] = {
     init: function () {
         this.appendDummyInput()
             .appendField("🛞")
-            .appendField("wheels")
+            .appendField(_emmi_msg('EMMI_WHEELS', 'wheels'))
             .appendField(new Blockly.FieldDropdown([
-                ["forward", "FORWARD"],
-                ["backward", "BACKWARD"],
-                ["left", "LEFT"],
-                ["right", "RIGHT"],
-                ["stop", "STOP"]
+                [_emmi_msg('EMMI_FORWARD', 'forward'), "FORWARD"],
+                [_emmi_msg('EMMI_BACKWARD', 'backward'), "BACKWARD"],
+                [_emmi_msg('EMMI_LEFT', 'left'), "LEFT"],
+                [_emmi_msg('EMMI_RIGHT', 'right'), "RIGHT"],
+                [_emmi_msg('EMMI_STOP', 'stop'), "STOP"]
             ]), "DIRECTION");
 
         this.setPreviousStatement(true, null);
@@ -105,17 +97,6 @@ var EMMI_BUZZER_TEMPOS = [
     ["Whole (1000ms)", "1000"]
 ];
 
-
-
-
-
-
-
-
-
-
-
-
 // ===========================================
 // Touch
 // ===========================================
@@ -123,10 +104,10 @@ var EMMI_BUZZER_TEMPOS = [
 Blockly.Blocks['emmi_touch_read'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("digital state PIN")
+            .appendField(_emmi_msg('EMMI_DIGITAL_STATE_PIN', 'digital state PIN'))
             .appendField(new Blockly.FieldDropdown([["TOUCH", "PIN_TOUCH"]]), "PIN")
 
-        this.setOutput(true, "Boolean"); // Returns true/false for if-block compatibility
+        this.setOutput(true, "Boolean");
         this.setColour("#3F51B5");
         this.setTooltip("Read digital state of touch sensor.");
         this.setHelpUrl("");
@@ -140,12 +121,12 @@ Blockly.Blocks['emmi_touch_read'] = {
 Blockly.Blocks['emmi_mic_read'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("digital state PIN")
+            .appendField(_emmi_msg('EMMI_DIGITAL_STATE_PIN', 'digital state PIN'))
             .appendField(new Blockly.FieldDropdown([["MIC", "PIN_MIC"]]), "PIN")
             .appendField(new Blockly.FieldDropdown([
-                ["pull-up", "INPUT_PULLUP"],
-                ["pull-down", "INPUT_PULLDOWN"],
-                ["input", "INPUT"]
+                [_emmi_msg('EMMI_PULL_UP', 'pull-up'), "INPUT_PULLUP"],
+                [_emmi_msg('EMMI_PULL_DOWN', 'pull-down'), "INPUT_PULLDOWN"],
+                [_emmi_msg('EMMI_INPUT', 'input'), "INPUT"]
             ]), "MODE");
         this.setOutput(true, "Number");
         this.setColour("#000000");
@@ -161,7 +142,7 @@ Blockly.Blocks['emmi_mic_read'] = {
 Blockly.Blocks['emmi_light_read'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("analog read PIN")
+            .appendField(_emmi_msg('EMMI_ANALOG_READ_PIN', 'analog read PIN'))
             .appendField(new Blockly.FieldDropdown([["LIGHT", "PIN_LIGHT"]]), "PIN");
         this.setOutput(true, "Number");
         this.setColour("#FFA726");
@@ -188,34 +169,12 @@ Blockly.Blocks['emmi_light_read'] = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Blockly.Blocks['buzzer_play_rtttl'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("buzzer")
+            .appendField(_emmi_msg('EMMI_BUZZER_LBL', 'buzzer'))
             .appendField(new Blockly.FieldDropdown(EMMI_BUZZER_PINS), "PIN")
-            .appendField("play ring tone")
+            .appendField(_emmi_msg('EMMI_PLAY_RING_TONE', 'play ring tone'))
             .appendField(new Blockly.FieldDropdown([
                 ["StarWars", "StarWars"],
                 ["MahnaMahna", "MahnaMahna"],
@@ -241,9 +200,9 @@ Blockly.Blocks['buzzer_play_rtttl'] = {
 Blockly.Blocks['buzzer_play_rtttl_custom'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("buzzer")
+            .appendField(_emmi_msg('EMMI_BUZZER_LBL', 'buzzer'))
             .appendField(new Blockly.FieldDropdown(EMMI_BUZZER_PINS), "PIN")
-            .appendField("play ring tone");
+            .appendField(_emmi_msg('EMMI_PLAY_RING_TONE', 'play ring tone'));
         this.appendValueInput("MELODY").setCheck("String");
         this.setInputsInline(true);
         this.setPreviousStatement(true, null);
@@ -256,9 +215,9 @@ Blockly.Blocks['buzzer_play_rtttl_custom'] = {
 Blockly.Blocks['buzzer_play_note'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("buzzer")
+            .appendField(_emmi_msg('EMMI_BUZZER_LBL', 'buzzer'))
             .appendField(new Blockly.FieldDropdown(EMMI_BUZZER_PINS), "PIN")
-            .appendField("play")
+            .appendField(_emmi_msg('EMMI_PLAY', 'play'))
             .appendField(new Blockly.FieldDropdown(EMMI_BUZZER_NOTES), "NOTE")
             .appendField(new Blockly.FieldDropdown(EMMI_BUZZER_TEMPOS), "TEMPO");
         this.setInputsInline(true);
@@ -272,10 +231,10 @@ Blockly.Blocks['buzzer_play_note'] = {
 Blockly.Blocks['buzzer_play_tone'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("buzzer")
+            .appendField(_emmi_msg('EMMI_BUZZER_LBL', 'buzzer'))
             .appendField(new Blockly.FieldDropdown(EMMI_BUZZER_PINS), "PIN");
-        this.appendValueInput("FREQ").setCheck("Number").appendField("♪ frequency (Hz)");
-        this.appendValueInput("DURATION").setCheck("Number").appendField("⊙ duration (ms)");
+        this.appendValueInput("FREQ").setCheck("Number").appendField(_emmi_msg('EMMI_FREQ_HZ', '♪ frequency (Hz)'));
+        this.appendValueInput("DURATION").setCheck("Number").appendField(_emmi_msg('EMMI_DURATION_MS', '⊙ duration (ms)'));
         this.setInputsInline(true);
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
@@ -287,7 +246,7 @@ Blockly.Blocks['buzzer_play_tone'] = {
 Blockly.Blocks['buzzer_stop'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("stop sound on")
+            .appendField(_emmi_msg('EMMI_STOP_SOUND_ON', 'stop sound on'))
             .appendField(new Blockly.FieldDropdown(EMMI_BUZZER_PINS), "PIN");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);

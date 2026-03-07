@@ -1,5 +1,12 @@
 'use strict';
 
+// Helper: safe Blockly.Msg lookup with English fallback (shared with emmi-bot-v2_blocks.js)
+if (typeof _emmi_msg === 'undefined') {
+    var _emmi_msg = function (key, fallback) {
+        return (typeof Blockly !== 'undefined' && Blockly.Msg && Blockly.Msg[key]) ? Blockly.Msg[key] : fallback;
+    };
+}
+
 /* =======================================================
    ESP32 Structure Block - Exact Screenshot Replica
    ======================================================= */
@@ -10,11 +17,11 @@ Blockly.Blocks['base_setup_loop'] = {
     init: function () {
         this.setColour('#2d2d64');
         this.appendDummyInput()
-            .appendField("Setup");
+            .appendField(_emmi_msg('EMMI_SETUP', 'Setup'));
         this.appendStatementInput("SETUP")
             .setCheck(null);
         this.appendDummyInput()
-            .appendField("Loop");
+            .appendField(_emmi_msg('EMMI_LOOP', 'Loop'));
         this.appendStatementInput("LOOP")
             .setCheck(null);
         this.setInputsInline(false);
@@ -39,14 +46,18 @@ Blockly.Blocks['base_setup_loop'] = {
 Blockly.Blocks['custom_wait'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("wait")
+            .appendField(_emmi_msg('EMMI_WAIT', 'wait'))
             .appendField(new Blockly.FieldNumber(1, 0), "DELAY");
         this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([["seconds", "SECONDS"], ["milliseconds", "MILLISECONDS"], ["microseconds", "MICROSECONDS"]]), "UNIT");
+            .appendField(new Blockly.FieldDropdown([
+                [_emmi_msg('EMMI_SECONDS', 'seconds'), "SECONDS"],
+                [_emmi_msg('EMMI_MILLISECONDS', 'milliseconds'), "MILLISECONDS"],
+                [_emmi_msg('EMMI_MICROSECONDS', 'microseconds'), "MICROSECONDS"]
+            ]), "UNIT");
         this.setInputsInline(true);
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour("#00838F"); // Teal color from screenshot
+        this.setColour("#00838F");
         this.setTooltip("Waits for a specified amount of time.");
         this.setHelpUrl("");
     }
@@ -56,17 +67,20 @@ Blockly.Blocks['custom_wait'] = {
 Blockly.Blocks['custom_timer'] = {
     init: function () {
         this.appendDummyInput("interval")
-            .appendField("all")
+            .appendField(_emmi_msg('EMMI_ALL', 'all'))
             .appendField(new Blockly.FieldNumber(1, 0), "interval");
         this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([["seconds", "SECONDS"], ["milliseconds", "MILLISECONDS"]]), "UNIT");
+            .appendField(new Blockly.FieldDropdown([
+                [_emmi_msg('EMMI_SECONDS', 'seconds'), "SECONDS"],
+                [_emmi_msg('EMMI_MILLISECONDS', 'milliseconds'), "MILLISECONDS"]
+            ]), "UNIT");
         this.appendStatementInput("DO")
             .setCheck(null)
-            .appendField("do");
+            .appendField(_emmi_msg('EMMI_DO', 'do'));
         this.setInputsInline(true);
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour("#00838F"); // Teal
+        this.setColour("#00838F");
         this.setTooltip("Executes code every N seconds/milliseconds.");
         this.setHelpUrl("");
     }
@@ -77,7 +91,10 @@ Blockly.Blocks['start_timekeeping'] = {
     init: function () {
         this.appendDummyInput()
             .appendField("start a timekeeping in")
-            .appendField(new Blockly.FieldDropdown([["seconds", "SECONDS"], ["milliseconds", "MILLISECONDS"]]), "UNIT");
+            .appendField(new Blockly.FieldDropdown([
+                [_emmi_msg('EMMI_SECONDS', 'seconds'), "SECONDS"],
+                [_emmi_msg('EMMI_MILLISECONDS', 'milliseconds'), "MILLISECONDS"]
+            ]), "UNIT");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour("#00838F");
@@ -91,7 +108,10 @@ Blockly.Blocks['get_duration'] = {
     init: function () {
         this.appendDummyInput()
             .appendField("duration in")
-            .appendField(new Blockly.FieldDropdown([["seconds", "SECONDS"], ["milliseconds", "MILLISECONDS"]]), "UNIT")
+            .appendField(new Blockly.FieldDropdown([
+                [_emmi_msg('EMMI_SECONDS', 'seconds'), "SECONDS"],
+                [_emmi_msg('EMMI_MILLISECONDS', 'milliseconds'), "MILLISECONDS"]
+            ]), "UNIT")
             .appendField("from the beginning");
         this.setOutput(true, "Number");
         this.setColour("#00838F");
@@ -561,11 +581,11 @@ Blockly.Blocks['logic_null'] = {
 Blockly.Blocks['esp32_digital_write'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("digital write PIN")
+            .appendField(_emmi_msg('EMMI_DIGITAL_WRITE_PIN', 'digital write PIN'))
             .appendField(new Blockly.FieldDropdown([
                 ["23", "23"], ["2", "2"], ["4", "4"], ["5", "5"], ["12", "12"], ["13", "13"], ["14", "14"], ["15", "15"], ["18", "18"], ["19", "19"]
             ]), "PIN")
-            .appendField("to")
+            .appendField(_emmi_msg('EMMI_TO', 'to'))
             .appendField(new Blockly.FieldDropdown([["HIGH", "HIGH"], ["LOW", "LOW"]]), "STATE");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
@@ -578,7 +598,7 @@ Blockly.Blocks['esp32_digital_write'] = {
 Blockly.Blocks['esp32_digital_state'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("digital state PIN")
+            .appendField(_emmi_msg('EMMI_DIGITAL_STATE_PIN', 'digital state PIN'))
             .appendField(new Blockly.FieldDropdown([
                 ["Green", "GREEN"],
                 ["Blue", "BLUE"],
@@ -591,7 +611,7 @@ Blockly.Blocks['esp32_digital_state'] = {
                 ["MOTOR3", "MOTOR3"],
                 ["MOTOR4", "MOTOR4"]
             ]), "PIN")
-            .appendField("pull-up")
+            .appendField(_emmi_msg('EMMI_PULLUP', 'pull-up'))
             .appendField(new Blockly.FieldCheckbox("FALSE"), "PULLUP");
         this.setOutput(true, "Boolean");
         this.setColour("#00838F");
@@ -622,7 +642,7 @@ Blockly.Blocks['esp32_analog_write'] = {
 Blockly.Blocks['esp32_analog_read'] = {
     init: function () {
         this.appendDummyInput()
-            .appendField("analog read PIN")
+            .appendField(_emmi_msg('EMMI_ANALOG_READ_PIN', 'analog read PIN'))
             .appendField(new Blockly.FieldDropdown([["LIGHT", "PIN_LIGHT"]]), "PIN");
         this.setOutput(true, "Number");
         this.setColour("#00838F");

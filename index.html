@@ -54,7 +54,23 @@
             <!-- Language Selector -->
             <select id="languageMenu">
                 <option value="en" selected>English GB</option>
-                <option value="es">Español</option>
+                <option value="de">Deutsch DE</option>
+                <option value="es">Español ES</option>
+                <option value="fr">Français FR</option>
+                <option value="it">Italiano IT</option>
+                <option value="hu">Magyar HU</option>
+                <option value="nl">Nederlands NL</option>
+                <option value="pl">Polski PL</option>
+                <option value="pt">Português PT</option>
+                <option value="ru">Русский RU</option>
+                <option value="tr">Türk TR</option>
+                <option value="cz">Čeština CZ</option>
+                <option value="bg">Български BG</option>
+                <option value="il">עברית IL</option>
+                <option value="ae">عربي AE</option>
+                <option value="jp">日本語 JP</option>
+                <option value="cn">简体中文 CN</option>
+                <option value="tw">繁體中文 TW</option>
                 <option value="hi">हिन्दी (Hindi)</option>
                 <option value="gu">ગુજરાતી (Gujarati)</option>
                 <option value="mr">मराठी (Marathi)</option>
@@ -81,7 +97,7 @@
                 <i class="fas fa-folder-open"></i>
             </button>
 
-            <!-- Board Selector -->
+<!-- Board Selector -->
             <select id="board-select">
                 <option value="emmi-bot-v2" selected>EMMI BOT V2</option>
                 <option value="explorer-kit">Explorer Kit</option>
@@ -111,8 +127,6 @@
                 <input type="radio" name="bot-mode" id="mode-usb" value="USB" checked>
                 <label for="mode-usb"><i class="fab fa-usb"></i> <span>USB</span></label>
 
-                <input type="radio" name="bot-mode" id="mode-ble" value="BLE">
-                <label for="mode-ble"><i class="fab fa-bluetooth-b"></i> <span>BLE</span></label>
 
                 <input type="radio" name="bot-mode" id="mode-cloud" value="Cloud">
                 <label for="mode-cloud"><i class="fas fa-cloud"></i> <span>Cloud</span></label>
@@ -145,38 +159,97 @@
         </div>
     </div>
 
-    <!-- AI Chatbot Panel -->
-    <div id="chatbot-panel" class="chatbot-panel">
-        <div class="chatbot-header">
-            <div class="chatbot-header-left">
-                <i class="fas fa-robot"></i>
-                <span>EMMI AI Coder</span>
+    <!-- AI Arduino Assistant Panel (from EMMI Core) -->
+    <div id="ai-chat-panel" class="ai-chat-panel">
+        <div class="ai-chat-header">
+            <span class="ai-chat-title"><i class="fa fa-robot"></i> AI Arduino Assistant</span>
+            <div class="ai-chat-header-btns">
+                <button id="btn_ai_sync_clipboard" class="ai-header-btn" title="Paste &amp; Insert from Clipboard"><i
+                        class="fa fa-clipboard-check"></i></button>
+                <button id="btn_ai_settings" class="ai-header-btn" title="Settings"><i class="fa fa-gear"></i></button>
+                <button id="btn_ai_close" class="ai-header-btn" title="Close"><i class="fa fa-times"></i></button>
             </div>
-            <div class="chatbot-header-right">
-                <select id="ai-translate-mode" class="chatbot-mode-select" title="AI translation mode">
-                    <option value="blockly" selected>Blockly</option>
-                    <option value="legacy">Script</option>
+        </div>
+        <div id="ai-chat-messages" class="ai-chat-messages">
+            <div class="ai-message ai-bot">
+                <div class="ai-avatar"><i class="fa fa-robot"></i></div>
+                <div class="ai-bubble">Hi! I'm your Arduino AI assistant. I can help you write code for <strong>Arduino,
+                        ESP8266, and ESP32</strong> boards. Just describe what you need!</div>
+            </div>
+        </div>
+        <div class="ai-chat-input-area" style="flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 4px; width: 100%;">
+                <select id="ai-chat-provider"
+                    style="flex: 1; padding: 4px; font-size: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+                    <option value="local" style="background:#1a1a2e;">Direct (In-App API)</option>
+                    <option value="chatgpt" style="background:#1a1a2e;">ChatGPT (External)</option>
+                    <option value="claude" style="background:#1a1a2e;">Claude (External)</option>
+                    <option value="gemini" style="background:#1a1a2e;">Gemini (External)</option>
+                    <option value="grok" style="background:#1a1a2e;">Grok (External)</option>
                 </select>
-                <button id="chatbot-clear" class="chatbot-header-btn" title="Clear chat">
-                    <i class="fas fa-trash-can"></i>
-                </button>
-                <button id="chatbot-close" class="chatbot-header-btn" title="Close">
-                    <i class="fas fa-xmark"></i>
-                </button>
+                <select id="ai-chat-mode"
+                    style="flex: 1; padding: 4px; font-size: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+                    <option value="code" style="background:#1a1a2e;">Output: Arduino Code</option>
+                    <option value="blocks" style="background:#1a1a2e;">Output: Blockly Blocks</option>
+                    <option value="chat" style="background:#1a1a2e;">Output: Just Chat</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 8px; width: 100%;">
+                <textarea id="ai-chat-input" placeholder="Describe what you need..." rows="2"></textarea>
+                <button id="btn_ai_send" class="ai-send-btn" title="Send"><i class="fa fa-paper-plane"></i></button>
             </div>
         </div>
-        <div id="ai-chat-output" class="chatbot-messages">
-            <div class="chatbot-welcome">
-                <i class="fas fa-wand-magic-sparkles"></i>
-                <p>Describe what you want your EMMI robot to do and I'll generate the blocks for you.</p>
+    </div>
+
+    <!-- AI Settings Modal -->
+    <div id="ai-settings-modal"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:12000; align-items:center; justify-content:center;">
+        <div
+            style="background:#fff; border-radius:12px; width:480px; max-width:95vw; box-shadow:0 10px 50px rgba(0,0,0,0.4); overflow:hidden;">
+            <div
+                style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid #eee;">
+                <h4 style="margin:0; font-size:17px; color:#333;"><i class="fa fa-gear"></i> AI Settings</h4>
+                <button id="btn_ai_cancel_settings"
+                    style="background:none; border:none; font-size:22px; color:#999; cursor:pointer;">&times;</button>
             </div>
-        </div>
-        <div class="chatbot-input-area">
-            <input id="ai-prompt-input" type="text" class="chatbot-input"
-                placeholder="e.g. Blink red LED every 500ms...">
-            <button id="btn-ai-generate" class="chatbot-send-btn" title="Generate">
-                <i class="fas fa-paper-plane"></i>
-            </button>
+            <div style="padding:20px; color:#333;">
+                <div style="margin-bottom:14px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:14px;">API
+                        Provider</label>
+                    <select id="ai-api-provider"
+                        style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; color:#333;">
+                        <option value="openrouter">OpenRouter (OpenAI-compatible)</option>
+                        <option value="google">Google AI Studio (Gemini)</option>
+                        <option value="custom">Custom (OpenAI-compatible)</option>
+                    </select>
+                </div>
+                <div id="ai-endpoint-group" style="display:none; margin-bottom:14px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:14px;">API Endpoint
+                        URL</label>
+                    <input type="text" id="ai-api-endpoint" value="https://openrouter.ai/api/v1/chat/completions"
+                        style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; color:#333;">
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label id="ai-key-label"
+                        style="display:block; font-weight:600; margin-bottom:6px; font-size:14px;">API Key</label>
+                    <input type="password" id="ai-api-key" placeholder="Enter your key..."
+                        style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; color:#333;">
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:14px;">Model Name</label>
+                    <input type="text" id="ai-model-name" placeholder="E.g. openai/gpt-4o or gemini-2.0-flash"
+                        value="openai/gpt-4o"
+                        style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; color:#333;">
+                    <small style="color:#888; font-size:12px;">OpenRouter: openai/gpt-4o &bull; Google:
+                        gemini-2.0-flash</small>
+                </div>
+            </div>
+            <div style="padding:14px 20px; border-top:1px solid #eee; display:flex; gap:8px; justify-content:flex-end;">
+                <button id="btn_ai_cancel_settings"
+                    style="background:#f5f5f5; color:#333; border:1px solid #ddd; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:500;">Cancel</button>
+                <button id="btn_ai_save_settings"
+                    style="background:linear-gradient(135deg,#0f1a2e,#2e4a7a); color:#fff; border:none; padding:8px 20px; border-radius:6px; cursor:pointer; font-weight:600;">Save</button>
+            </div>
         </div>
     </div>
 
@@ -196,7 +269,7 @@
                 <button id="btn_copy" class="btn-default" title="Copy Code">
                     <i class="fas fa-copy"></i>
                 </button>
-            </div>
+</div>
             <pre id="pre_previewArduino"><code class="language-cpp" id="code-output">void setup() {
 }
 
@@ -207,7 +280,7 @@ void loop() {
                 <button class="code-tab" data-lang="arduino">Arduino C++</button>
                 <button class="code-tab" data-lang="python">Python</button>
                 <button class="code-tab active" data-lang="java">Java</button>
-            </div>
+</div>
         </div>
     </div>
 
@@ -331,7 +404,9 @@ void loop() {
     <script src="js/generators/emmi-bot-v2_generators.js?v=23"></script>
     <script src="js/custom_styles.js"></script>
     <script src="js/blockly-mapper.js?v=1"></script>
-    <script src="js/app.js?v=37"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/ai-chat.js"></script>
+    <script src="js/app.js?v=31"></script>
 </body>
 
 </html>

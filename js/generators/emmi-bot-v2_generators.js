@@ -86,10 +86,7 @@ arduinoGenerator.forBlock['emmi_eyes_digital'] = function (block) {
 
 // --- Wheels ---
 
-arduinoGenerator.forBlock['emmi_wheels_init'] = function (block) {
-    ensureSetup('wheels');
-    return '';
-};
+
 
 arduinoGenerator.forBlock['emmi_wheels_simple'] = function(block) {
 
@@ -237,10 +234,7 @@ pythonGenerator.forBlock['emmi_eyes_digital'] = function (block) {
 
 // --- Wheels ---
 
-pythonGenerator.forBlock['emmi_wheels_init'] = function (block) {
-    ensurePythonSetup('wheels');
-    return '';
-};
+
 
 pythonGenerator.forBlock['emmi_wheels_simple'] = function(block) {
 
@@ -363,13 +357,7 @@ javaGenerator.forBlock['emmi_eyes_digital'] = function (block) {
 
 // --- Wheels ---
 
-javaGenerator.forBlock['emmi_wheels_init'] = function (block) {
-    return '        // Initialize wheel motors\n' +
-        '        gpio.pinMode(' + 16 + ', GPIO.OUTPUT);\n' +
-        '        gpio.pinMode(' + 17 + ', GPIO.OUTPUT);\n' +
-        '        gpio.pinMode(' + 18 + ', GPIO.OUTPUT);\n' +
-        '        gpio.pinMode(' + 19 + ', GPIO.OUTPUT);\n';
-};
+
 
 javaGenerator.forBlock['emmi_wheels_simple'] = function(block) {
 

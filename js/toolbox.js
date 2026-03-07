@@ -387,10 +387,6 @@ function getEmmiBotV2Categories() {
             "contents": [
                 {
                     "kind": "block",
-                    "type": "emmi_wheels_init"
-                },
-                {
-                    "kind": "block",
                     "type": "emmi_wheels_simple"
                 }
             ]
@@ -521,4 +517,74 @@ let ESP32Toolbox = getToolbox('emmi-bot-v2');
 
 function getToolboxForBoard(boardType) {
     return getToolbox(boardType);
+}
+
+/**
+ * Returns a localized toolbox for the given language and board type.
+ * Category names are translated using EMMITranslations when available.
+ */
+function getLocalizedToolbox(lang, boardType) {
+    if (!boardType) {
+        const sel = document.getElementById('board-select');
+        boardType = (sel && sel.value) || 'emmi-bot-v2';
+    }
+
+    const translations = (typeof EMMITranslations !== 'undefined' && EMMITranslations[lang])
+        ? EMMITranslations[lang]
+        : (typeof EMMITranslations !== 'undefined' ? EMMITranslations['en'] : null);
+
+    // Map English category label (no emoji) -> translation key
+    const categoryKeyMap = {
+        'Structure': 'STRUCTURE',
+        'Timing': 'TIMING',
+        'Arduino': 'ARDUINO',
+        'Control': 'CONTROL',
+        'Operators': 'OPERATORS',
+        'Variables': 'VARIABLES',
+        'Communicate': 'COMMUNICATE',
+        'Eyes': 'EYES',
+        'Wheels': 'WHEELS',
+        'Buzzer': 'BUZZER',
+        'Touch': 'TOUCH',
+        'Mic': 'MIC',
+        'Light': 'LIGHT',
+        'OLED': 'DISPLAY',
+        'Legs': 'ROBOT',
+        'Servo': 'SERVO'
+    };
+
+    // Original toolbox emoji per category
+    const categoryEmojis = {
+        'Structure': '🔧', 'Timing': '⏱️', 'Arduino': '🎛️', 'Control': '🔄',
+        'Operators': '🔢', 'Variables': '✖️', 'Communicate': '🔔',
+        'Eyes': '👀', 'Wheels': '💪', 'Buzzer': '🔊', 'Touch': '👉',
+        'Mic': '🔦', 'Light': '💡', 'OLED': '🖥️', 'Legs': '🦵', 'Servo': '🦾'
+    };
+
+    function translateCategoryName(name) {
+        if (!translations || !name) return name;
+        const parts = name.trim().split(/\s+/);
+        const englishLabel = parts.slice(1).join(' ') || parts[0];
+        const key = categoryKeyMap[englishLabel];
+        if (!key) return name;
+        const translated = translations[key];
+        if (!translated) return name;
+        const emoji = categoryEmojis[englishLabel] || (parts.length > 1 ? parts[0] : '');
+        // Strip emoji from translated value, then re-apply original toolbox emoji
+        return emoji ? emoji + ' ' + translated.replace(/^[^\s]+\s/, '') : translated;
+    }
+
+    function localizeItems(items) {
+        if (!Array.isArray(items)) return items;
+        return items.map(item => {
+            if (!item || item.kind !== 'category') return item;
+            const clone = Object.assign({}, item);
+            clone.name = translateCategoryName(item.name);
+            if (Array.isArray(item.contents)) clone.contents = localizeItems(item.contents);
+            return clone;
+        });
+    }
+
+    const base = getToolbox(boardType);
+    return { kind: base.kind, contents: localizeItems(base.contents) };
 }
