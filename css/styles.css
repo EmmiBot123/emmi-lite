@@ -1319,6 +1319,7 @@ g[data-id]>path[class*="blocklyPath"] {
 
     .segmented-glider {
         width: calc(33.33% - 4px);
+        pointer-events: none;
     }
 
     #languageMenu,

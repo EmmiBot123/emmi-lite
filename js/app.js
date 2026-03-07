@@ -1996,9 +1996,12 @@ class ESP32BlocklyApp {
             if (mode === 'Cloud') {
                 await this.sendEmmiScriptToCloud(this.lastEmmiScript);
                 this.showToast('Last EMMI script uploaded to cloud!', 'success');
-            } else {
+            } else if (mode === 'USB') {
                 await this.sendEmmiScriptToSerial(this.lastEmmiScript);
-                this.showToast('Last EMMI script sent!', 'success');
+                this.showToast('Last EMMI script sent via USB!', 'success');
+            } else if (mode === 'BLE') {
+                await this.sendEmmiScriptToBLE(this.lastEmmiScript);
+                this.showToast('Last EMMI script sent via Bluetooth!', 'success');
             }
         } catch (err) {
             this.showToast(err.message, 'error');
