@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EMMI BOT Lite - Block-Based Programming Environment">
+    <title>EMMI BOT Lite</title>
+    <link rel="icon" type="image/png" href="media/logo.png">
+
+    <!-- Blockly (local) -->
+    <script src="lib/blockly/blockly.min.js"></script>
+
+    <!-- Prism.js for syntax highlighting - LIGHT theme (local) -->
+    <link href="lib/prism/themes/prism.min.css" rel="stylesheet">
+    <script src="lib/prism/prism.min.js"></script>
+    <script src="lib/prism/components/prism-c.min.js"></script>
+    <script src="lib/prism/components/prism-cpp.min.js"></script>
+    <script src="lib/prism/components/prism-python.min.js"></script>
+    <script src="lib/prism/components/prism-java.min.js"></script>
+
+    <!-- Font Awesome (local) -->
+    <link rel="stylesheet" href="lib/font-awesome/css/all.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css?v=25">
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="loader"></div>
+        <span>Loading EMMI BOT V2...</span>
+    </div>
+
+    <!-- Title Bar (OttoBlockly style) -->
+    <div id="toptitle">
+        <div id="title">
+            <div class="logo-img">
+                <img src="media/logo.png" alt="Logo" onerror="this.style.display='none'">
+            </div>
+            <span class="logo-text">EMMI BOT Lite</span>
+
+        </div>
+
+
+    </div>
+
+    <!-- Header Toolbar -->
+    <div id="header">
+        <div id="btn_all">
+            <!-- Language Selector -->
+
+            <!-- Language Selector -->
+            <select id="languageMenu">
+                <option value="en" selected>English GB</option>
+                <option value="de">Deutsch DE</option>
+                <option value="es">Español ES</option>
+                <option value="fr">Français FR</option>
+                <option value="it">Italiano IT</option>
+                <option value="hu">Magyar HU</option>
+                <option value="nl">Nederlands NL</option>
+                <option value="pl">Polski PL</option>
+                <option value="pt">Português PT</option>
+                <option value="ru">Русский RU</option>
+                <option value="tr">Türk TR</option>
+                <option value="cz">Čeština CZ</option>
+                <option value="bg">Български BG</option>
+                <option value="il">עברית IL</option>
+                <option value="ae">عربي AE</option>
+                <option value="jp">日本語 JP</option>
+                <option value="cn">简体中文 CN</option>
+                <option value="tw">繁體中文 TW</option>
+                <option value="hi">हिन्दी (Hindi)</option>
+                <option value="gu">ગુજરાતી (Gujarati)</option>
+                <option value="mr">मराठी (Marathi)</option>
+                <option value="ta">தமிழ் (Tamil)</option>
+                <option value="te">తెలుగు (Telugu)</option>
+                <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                <option value="bn">বাংলা (Bengali)</option>
+            </select>
+
+
+
+            <!-- Save Button -->
+            <button id="btn-save" class="btn btn-tool" title="Save">
+                <i class="fas fa-save"></i>
+            </button>
+
+            <!-- New Button -->
+            <button id="btn-new" class="btn btn-tool" title="New">
+                <i class="fas fa-file"></i>
+            </button>
+
+            <!-- Open Button -->
+            <button id="btn-open" class="btn btn-tool" title="Open">
+                <i class="fas fa-folder-open"></i>
+            </button>
+
+<!-- Board Selector -->
+            <select id="board-select">
+                <option value="emmi-bot-v2" selected>EMMI BOT V2</option>
+                <option value="explorer-kit">SENSOR BOARD</option>
+                <option value="emmi-bipedal">FLIPPER</option>
+                <option value="emmi-v1">EMMI BIPEDAL</option>
+            </select>
+
+            <!-- Run Button -->
+            <button id="btn_run" class="btn btn-tool" title="Run Code" style="color: #4CAF50;">
+                <i class="fas fa-play"></i>
+            </button>
+
+            <!-- Dynamic Controls -->
+            <div id="dynamic-controls" style="display: flex; gap: 5px; align-items: center;">
+                <!-- Cloud ID Input (Hidden by default) -->
+                <input id="input-cloud-id" type="text" placeholder="Device ID"
+                    style="display: none; width: 100px; padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+
+                <!-- Connect Button (Visible for USB/BLE) -->
+                <button id="btn_connect" class="btn btn-tool" title="Connect USB"
+                    style="color: #2196F3; width: auto; padding: 0 10px; font-size: 13px; gap: 5px;">
+                    <i class="fas fa-plug"></i> <span id="lbl_connect">Connect</span>
+                </button>
+            </div>
+
+            <!-- Bot Mode Segmented Control -->
+            <div class="bot-mode-segmented">
+                <input type="radio" name="bot-mode" id="mode-usb" value="USB" checked>
+                <label for="mode-usb"><i class="fab fa-usb"></i> <span>USB</span></label>
+
+
+                <input type="radio" name="bot-mode" id="mode-cloud" value="Cloud">
+                <label for="mode-cloud"><i class="fas fa-cloud"></i> <span>Cloud</span></label>
+
+                <div class="segmented-glider"></div>
+            </div>
+        </div>
+
+        <div id="btn_group" class="btn-group">
+            <!-- Search Button -->
+            <button id="btn_search" class="btn btn-tool" title="Search">
+                <i class="fas fa-search"></i>
+            </button>
+
+            <!-- Code Preview Button -->
+            <button id="btn_preview" class="btn btn-tool" title="Code Preview">
+                <i class="fas fa-code"></i>
+            </button>
+
+            <!-- Block/Code Toggle (Hijacked for Firmware Upload) -->
+            <button id="btn_toggle" class="btn btn-tool" title="Upload Firmware"
+                onclick="if(window.app) window.app.uploadFirmware()">
+                <i class="fas fa-microchip"></i>
+            </button>
+
+            <!-- AI Chatbot Toggle -->
+            <button id="chatbot-toggle" class="btn btn-tool chatbot-toggle" title="AI Block Coder">
+                <i class="fas fa-robot"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- AI Arduino Assistant Panel (from EMMI Core) -->
+    <div id="ai-chat-panel" class="ai-chat-panel">
+        <div class="ai-chat-header">
+            <span class="ai-chat-title"><i class="fa fa-robot"></i> AI Arduino Assistant</span>
+            <div class="ai-chat-header-btns">
+                <button id="btn_ai_sync_clipboard" class="ai-header-btn" title="Paste &amp; Insert from Clipboard"><i
+                        class="fa fa-clipboard-check"></i></button>
+                <button id="btn_ai_settings" class="ai-header-btn" title="Settings"><i class="fa fa-gear"></i></button>
+                <button id="btn_ai_close" class="ai-header-btn" title="Close"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+        <div id="ai-chat-messages" class="ai-chat-messages">
+            <div class="ai-message ai-bot">
+                <div class="ai-avatar"><i class="fa fa-robot"></i></div>
+                <div class="ai-bubble">Hi! I'm your Arduino AI assistant. I can help you write code for <strong>Arduino,
+                        ESP8266, and ESP32</strong> boards. Just describe what you need!</div>
+            </div>
+        </div>
+        <div class="ai-chat-input-area" style="flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 4px; width: 100%;">
+                <select id="ai-chat-provider"
+                    style="flex: 1; padding: 4px; font-size: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+                    <option value="local" style="background:#1a1a2e;">Direct (In-App API)</option>
+                    <option value="chatgpt" style="background:#1a1a2e;">ChatGPT (External)</option>
+                    <option value="claude" style="background:#1a1a2e;">Claude (External)</option>
+                    <option value="gemini" style="background:#1a1a2e;">Gemini (External)</option>
+                    <option value="grok" style="background:#1a1a2e;">Grok (External)</option>
+                </select>
+                <select id="ai-chat-mode"
+                    style="flex: 1; padding: 4px; font-size: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+                    <option value="code" style="background:#1a1a2e;">Output: Arduino Code</option>
+                    <option value="blocks" style="background:#1a1a2e;">Output: Blockly Blocks</option>
+                    <option value="chat" style="background:#1a1a2e;">Output: Just Chat</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 8px; width: 100%;">
+                <textarea id="ai-chat-input" placeholder="Describe what you need..." rows="2"></textarea>
+                <button id="btn_ai_send" class="ai-send-btn" title="Send"><i class="fa fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Settings Modal -->
+    <div id="ai-settings-modal"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:12000; align-items:center; justify-content:center;">
+        <div
+            style="background:#fff; border-radius:12px; width:480px; max-width:95vw; box-shadow:0 10px 50px rgba(0,0,0,0.4); overflow:hidden;">
+            <div
+                style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid #eee;">
+                <h4 style="margin:0; font-size:17px; color:#333;"><i class="fa fa-gear"></i> AI Settings</h4>
+                <button id="btn_ai_cancel_settings"
+                    style="background:none; border:none; font-size:22px; color:#999; cursor:pointer;">&times;</button>
+            </div>
+            <div style="padding:20px; color:#333;">
+                <div style="margin-bottom:14px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:14px;">API
+                        Provider</label>
+                    <select id="ai-api-provider"
+                        style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; color:#333;">
+                        <option value="openrouter">OpenRouter (OpenAI-compatible)</option>
+                        <option value="google">Google AI Studio (Gemini)</option>
+                        <option value="custom">Custom (OpenAI-compatible)</option>
+                    </select>
+                </div>
+                <div id="ai-endpoint-group" style="display:none; margin-bottom:14px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:14px;">API Endpoint
+                        URL</label>
+                    <input type="text" id="ai-api-endpoint" value="https://openrouter.ai/api/v1/chat/completions"
+                        style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; color:#333;">
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label id="ai-key-label"
+                        style="display:block; font-weight:600; margin-bottom:6px; font-size:14px;">API Key</label>
+                    <input type="password" id="ai-api-key" placeholder="Enter your key..."
+                        style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; color:#333;">
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:14px;">Model Name</label>
+                    <input type="text" id="ai-model-name" placeholder="E.g. openai/gpt-4o or gemini-2.0-flash"
+                        value="openai/gpt-4o"
+                        style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; color:#333;">
+                    <small style="color:#888; font-size:12px;">OpenRouter: openai/gpt-4o &bull; Google:
+                        gemini-2.0-flash</small>
+                </div>
+            </div>
+            <div style="padding:14px 20px; border-top:1px solid #eee; display:flex; gap:8px; justify-content:flex-end;">
+                <button id="btn_ai_cancel_settings"
+                    style="background:#f5f5f5; color:#333; border:1px solid #ddd; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:500;">Cancel</button>
+                <button id="btn_ai_save_settings"
+                    style="background:linear-gradient(135deg,#0f1a2e,#2e4a7a); color:#fff; border:none; padding:8px 20px; border-radius:6px; cursor:pointer; font-weight:600;">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div id="divBody">
+        <!-- Blockly Workspace -->
+        <div id="content_blocks">
+            <div id="blockly-workspace"></div>
+        </div>
+
+        <!-- Code Panel - Default hidden -->
+        <div id="code-panel" class="code-preview-panel hidden">
+            <div class="preview-actions">
+                <button id="btn_saveino" class="btn-default" title="Save Code">
+                    <i class="fas fa-save"></i>
+                </button>
+                <button id="btn_copy" class="btn-default" title="Copy Code">
+                    <i class="fas fa-copy"></i>
+                </button>
+</div>
+            <pre id="pre_previewArduino"><code class="language-cpp" id="code-output">void setup() {
+}
+
+void loop() {
+}</code></pre>
+            <!-- Language Tabs at bottom -->
+            <div class="code-tabs">
+                <button class="code-tab" data-lang="arduino">Arduino C++</button>
+                <button class="code-tab" data-lang="python">Python</button>
+                <button class="code-tab active" data-lang="java">Java</button>
+</div>
+        </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="file-input" accept=".xml,.json,.bloc" style="display: none;">
+    <!-- Firmware Update Modal -->
+    <div id="firmware-update-modal" class="modal hidden">
+        <div class="modal-content firmware-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-microchip"></i> Firmware Update</h3>
+                <button id="btn-close-firmware" class="btn-close">&times;</button>
+            </div>
+            <div class="firmware-body">
+                <!-- Version comparison cards -->
+                <div class="firmware-versions">
+                    <div class="firmware-version-card">
+                        <div class="firmware-version-icon installed">
+                            <i class="fas fa-hdd"></i>
+                        </div>
+                        <div class="firmware-version-label">Installed</div>
+                        <div id="firmware-installed-version" class="firmware-version-value installed">—</div>
+                    </div>
+                    <div class="firmware-version-arrow">
+                        <i class="fas fa-angles-right"></i>
+                    </div>
+                    <div class="firmware-version-card">
+                        <div class="firmware-version-icon available">
+                            <i class="fas fa-cloud-arrow-down"></i>
+                        </div>
+                        <div class="firmware-version-label">Available</div>
+                        <div id="firmware-available-version" class="firmware-version-value available">—</div>
+                    </div>
+                </div>
+
+                <!-- Status text -->
+                <div id="firmware-status-text" class="firmware-status"></div>
+
+                <!-- Progress bar -->
+                <div id="firmware-progress-container" class="firmware-progress-container" style="display: none;">
+                    <div class="firmware-progress-track">
+                        <div id="firmware-progress-bar" class="firmware-progress-fill"></div>
+                    </div>
+                    <div id="firmware-progress-text" class="firmware-progress-label">0%</div>
+                </div>
+
+                <!-- Log output -->
+                <div id="firmware-log" class="firmware-log" style="display: none;"></div>
+
+                <!-- Action buttons -->
+                <div class="firmware-actions">
+                    <button id="btn-firmware-cancel" class="firmware-btn firmware-btn-cancel">
+                        <i class="fas fa-xmark"></i> Cancel
+                    </button>
+                    <button id="btn-firmware-flash" class="firmware-btn firmware-btn-flash">
+                        <i class="fas fa-bolt"></i> Update Firmware
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Serial Monitor Modal -->
+    <div id="serial-monitor-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-terminal"></i> Serial Monitor</h3>
+                <button id="btn-close-serial" class="btn-close">&times;</button>
+            </div>
+            <div id="serial-output" class="serial-output"></div>
+            <div class="serial-input-area">
+                <input type="text" id="serial-input" placeholder="Type command...">
+                <button id="btn-send-serial" class="btn btn-tool" title="Send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                <button id="btn-clear-serial" class="btn btn-tool" title="Clear">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="serial-options">
+                <label><input type="checkbox" id="chk-autoscroll" checked> Autoscroll</label>
+                <label><input type="checkbox" id="chk-timestamp"> Timestamp</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Variable Modal -->
+    <div id="variable-modal" class="modal hidden" style="z-index: 2000;">
+        <div class="modal-content" style="max-width: 400px; background-color: #2d2d64; color: white;">
+            <div class="modal-header" style="border-bottom: none;">
+                <h3 style="color: white; font-weight: bold;">New variable name:</h3>
+                <button id="btn-close-variable" class="btn-close"
+                    style="background-color: #4DB6AC; color: white; border-radius: 4px; opacity: 1;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px; display: flex; gap: 0;">
+                <input type="text" id="variable-name-input" placeholder=""
+                    style="flex-grow: 1; padding: 10px; border: none; border-radius: 4px 0 0 4px; outline: none;">
+                <button id="btn-confirm-variable"
+                    style="background-color: #4DD0E1; border: none; padding: 0 20px; color: white; font-weight: bold; border-radius: 0 4px 4px 0; cursor: pointer;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Scripts -->
+    <!-- Generators (Load first so blocks can register stubs) -->
+    <script src="js/generators/arduino.js"></script>
+    <script src="js/generators/python.js"></script>
+    <script src="js/generators/java.js"></script>
+    <script src="js/commands/common_commands.js?v=2"></script>
+    <script src="js/commands/emmi-bot-v2_commands.js?v=21"></script>
+    <script src="js/commands/emmi-bipedal_commands.js?v=1"></script>
+    <script src="js/commands/emmi-v1_commands.js?v=1"></script>
+    <script src="js/generators/emmi_exporter.js?v=26"></script>
+
+    <!-- Common/Core blocks -->
+    <script src="js/toolbox.js?v=23"></script>
+    <script src="blocks/esp32_blocks.js?v=23"></script>
+    <script src="blocks/variable_blocks.js?v=23"></script>
+    <script src="blocks/communication_blocks.js?v=23"></script>
+    <script src="blocks/emmi-bot-v2_blocks.js?v=24"></script>
+    <script src="blocks/emmi-bipedal_blocks.js?v=1"></script>
+    <script src="blocks/emmi-v1_blocks.js?v=1"></script>
+    <script src="js/generators/variable_generators.js?v=23"></script>
+    <script src="js/generators/communication_generators.js?v=23"></script>
+    <script src="js/generators/emmi-bot-v2_generators.js?v=23"></script>
+    <script src="js/generators/arduino_emmi-bipedal.js?v=2"></script>
+    <script src="js/generators/python_emmi-bipedal.js?v=2"></script>
+    <script src="js/generators/java_emmi-bipedal.js?v=2"></script>
+    <script src="js/generators/emmi-v1_generators.js?v=2"></script>
+    <script src="js/custom_styles.js"></script>
+    <script src="js/blockly-mapper.js?v=1"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/ai-chat.js"></script>
+    <script src="js/app.js?v=31"></script>
+</body>
+
+</html>
