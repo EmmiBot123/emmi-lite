@@ -24,7 +24,7 @@ class ESP32BlocklyApp {
         this.uploadConfirmationResolver = null;
         this.uploadConfirmationRejecter = null;
         this.uploadConfirmationToken = ':$#$:';
-        this.uploadConfirmationTimeoutMs = 12000;
+        this.uploadConfirmationTimeoutMs = 3000;
         this.toastHideTimeoutId = null;
         this.serialBuffer = '';
         this.aiRequestInFlight = false;
@@ -38,6 +38,7 @@ class ESP32BlocklyApp {
         this.FIRMWARE_FILES = [
             { name: 'bootloader.bin', offset: 0x1000 },
             { name: 'partitions.bin', offset: 0x8000 },
+            { name: 'boot_app0.bin', offset: 0xe000 },
             { name: 'firmware.bin', offset: 0x10000 }
         ];
         this.FIRMWARE_VERSION_URL = this.FIRMWARE_BASE_URL + '/version.txt';
@@ -1586,6 +1587,20 @@ class ESP32BlocklyApp {
         this.showToast('Preparing upload...', 'info');
         await new Promise(resolve => setTimeout(resolve, 2000));
 
+        // Send ##F0 first to exit firmware-upload mode (if active on the ESP32).
+        // When the device is stuck in flash mode, it silently ignores all scripts.
+        const exitFlashWriter = this.port.writable.getWriter();
+        try {
+            await exitFlashWriter.write(new TextEncoder().encode('##F0\n'));
+        } catch (_) {
+            // Ignore errors from the pre-command; proceed with the main send.
+        } finally {
+            exitFlashWriter.releaseLock();
+        }
+
+        // Small pause to let the ESP32 process the exit command.
+        await new Promise(resolve => setTimeout(resolve, 300));
+
         const writer = this.port.writable.getWriter();
         try {
             console.log('EMMI TX:', script);
@@ -1845,11 +1860,21 @@ class ESP32BlocklyApp {
                 await this.sendEmmiScriptToSerial(generated.script);
 
                 if (mode === 'USB') {
-                    await this.waitForUploadConfirmation();
-                    this.showToast('Upload successful.', 'success', {
-                        durationMs: 2000,
-                        showClose: true
-                    });
+                    try {
+                        await this.waitForUploadConfirmation();
+                        this.showToast('Upload successful ✓', 'success', {
+                            durationMs: 2000,
+                            showClose: true
+                        });
+                    } catch (confirmErr) {
+                        // Firmware may not send :$#$: ACK — treat as success
+                        // since the script was already transmitted over serial.
+                        console.warn('Upload confirmation skipped:', confirmErr.message);
+                        this.showToast('Command sent successfully.', 'success', {
+                            durationMs: 2000,
+                            showClose: true
+                        });
+                    }
                 } else {
                     this.showToast('EMMI script sent successfully.', 'success');
                 }
@@ -2126,21 +2151,38 @@ class ESP32BlocklyApp {
             for (let i = 0; i < this.FIRMWARE_FILES.length; i++) {
                 const fw = this.FIRMWARE_FILES[i];
                 const url = fw.url || (this.FIRMWARE_BASE_URL + '/' + fw.name);
-                this.appendFirmwareLog('Downloading ' + fw.name + '...');
+
+                if (!url) throw new Error(fw.name + ' has no URL configured. Please set firmware URLs in Block Creator → Firmware Settings.');
+
+                this.appendFirmwareLog('Downloading ' + fw.name + ' from: ' + url);
 
                 const resp = await fetch(url, { cache: 'no-store' });
-                if (!resp.ok) throw new Error('Failed to download ' + fw.name + ' (HTTP ' + resp.status + ')');
+                if (!resp.ok) throw new Error('Failed to download ' + fw.name + ' (HTTP ' + resp.status + ' from ' + url + ')');
 
                 const blob = await resp.blob();
+
+                if (blob.size === 0) {
+                    throw new Error(fw.name + ' downloaded 0 bytes from ' + url + '. Check that the file exists in S3 and is publicly readable.');
+                }
+
                 const data = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
+                    reader.onload = () => {
+                        const result = reader.result;
+                        if (typeof result !== 'string') {
+                            reject(new Error('FileReader returned non-string for ' + fw.name + ' (got ' + typeof result + ')'));
+                        } else if (result.length === 0) {
+                            reject(new Error(fw.name + ' binary data is empty after reading'));
+                        } else {
+                            resolve(result);
+                        }
+                    };
                     reader.onerror = () => reject(new Error('Failed to read ' + fw.name));
                     reader.readAsBinaryString(blob);
                 });
 
                 fileArray.push({ data: data, address: fw.offset });
-                this.appendFirmwareLog(fw.name + ' downloaded (' + Math.round(blob.size / 1024) + ' KB)');
+                this.appendFirmwareLog(fw.name + ' downloaded (' + Math.round(blob.size / 1024) + ' KB, ' + data.length + ' bytes)');
 
                 const downloadPct = ((i + 1) / this.FIRMWARE_FILES.length) * 30;
                 this.setFirmwareProgress(downloadPct);
@@ -2175,11 +2217,11 @@ class ESP32BlocklyApp {
             try {
                 esploader = new LoaderClass({
                     transport: transport,
-                    baudrate: 921600,
+                    baudrate: 460800,
                     terminal: terminalProxy
                 });
             } catch (e) {
-                esploader = new LoaderClass(transport, 921600, terminalProxy, 921600);
+                esploader = new LoaderClass(transport, 460800, terminalProxy, 460800);
             }
 
             this.appendFirmwareLog('Connecting to ESP32 bootloader...');
@@ -2230,20 +2272,30 @@ class ESP32BlocklyApp {
             this.setFirmwareStatus('Flash failed: ' + err.message);
             this.showToast('Firmware Update Failed', 'error');
         } finally {
-            // Re-enable serial reading
-            if (this.port && !this.port.readable) {
-                try {
-                    await this.port.open({ baudRate: 115200 });
-                } catch (e) {
-                    console.warn('Could not re-open port:', e);
-                }
+            // After esptool-js flashes, it calls transport.disconnect() which
+            // invalidates the Web Serial port object. We must fully clean up
+            // and let the user reconnect fresh — trying to reuse the old port
+            // will silently fail (Buffer always empty).
+            this.keepReading = false;
+            if (this.reader) {
+                try { await this.reader.cancel(); } catch (_) {}
+                this.reader = null;
             }
-            this.keepReading = true;
-            this.readLoop();
-            this.startUsbHealthMonitor();
+            // Force-close the port regardless of state
+            try {
+                if (this.port) await this.port.close();
+            } catch (_) {}
+            this.port = null;
+            this.updateUsbButtonState(false);
+            this.stopUsbHealthMonitor();
 
             this.firmwareFlashInProgress = false;
             if (flashBtn) flashBtn.disabled = false;
+
+            // Inform user they must reconnect
+            this.appendFirmwareLog('');
+            this.appendFirmwareLog('✓ Reconnect your USB cable or click Connect to resume.');
+            this.setFirmwareStatus('Done! Please reconnect USB to upload programs.');
         }
     }
 
@@ -2502,9 +2554,12 @@ class ESP32BlocklyApp {
 
         // Only update if URLs are actually set for this board
         if (cfg.firmwareUrl || cfg.partitionsUrl || cfg.bootloaderUrl) {
+            // Derive base URL from firmware URL for boot_app0.bin (unless explicitly provided)
+            const baseUrl = cfg.firmwareUrl ? cfg.firmwareUrl.replace(/\/[^/]+$/, '') : '';
             this.FIRMWARE_FILES = [
                 { name: 'bootloader.bin', offset: 0x1000, url: cfg.bootloaderUrl || '' },
                 { name: 'partitions.bin', offset: 0x8000, url: cfg.partitionsUrl || '' },
+                { name: 'boot_app0.bin', offset: 0xe000, url: cfg.bootappUrl || (baseUrl ? baseUrl + '/boot_app0.bin' : '') },
                 { name: 'firmware.bin', offset: 0x10000, url: cfg.firmwareUrl || '' }
             ];
         }

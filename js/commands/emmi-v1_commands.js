@@ -9,177 +9,177 @@
     const registry = globalScope.emmiCommandGenerator.forBlock;
 
     registry['bipedal_dance'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('M');
-                            }
-                            const movement = String(block.getFieldValue('otto_dance_movement') || '');
-                            const speed    = String(block.getFieldValue('otto_move_speed')     || '1000');
-                            const size     = String(block.getFieldValue('otto_dance_size')     || '15');
-                    
-                            const moveMap = {
-                                'moonwalkerLEFT':  'MML',
-                                'moonwalkerRIGHT': 'MMR',
-                                'crusaitoLEFT':    'MCL',
-                                'crusaitoRIGHT':   'MCR',
-                                'flappingFRONT':   'MFL',
-                                'flappingBACK':    'MFR'
-                            };
-                            const cmd = moveMap[movement];
-                            if (!cmd) return [''];
-                            return [cmd + speed + ',' + size];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('M');
+                                                            }
+                                                            const movement = String(block.getFieldValue('otto_dance_movement') || '');
+                                                            const speed    = String(block.getFieldValue('otto_move_speed')     || '1000');
+                                                            const size     = String(block.getFieldValue('otto_dance_size')     || '15');
+                                                    
+                                                            const moveMap = {
+                                                                'moonwalkerLEFT':  'MML',
+                                                                'moonwalkerRIGHT': 'MMR',
+                                                                'crusaitoLEFT':    'MCL',
+                                                                'crusaitoRIGHT':   'MCR',
+                                                                'flappingFRONT':   'MFL',
+                                                                'flappingBACK':    'MFR'
+                                                            };
+                                                            const cmd = moveMap[movement];
+                                                            if (!cmd) return [''];
+                                                            return [cmd + speed + ',' + size];
+                                                        };
 
     registry['bipedal_do'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('M');
-                            }
-                            const movement = String(block.getFieldValue('otto_do_movement') || '');
-                            const speed    = String(block.getFieldValue('otto_move_speed')  || '1000');
-                            const size     = String(block.getFieldValue('otto_dance_size')  || '15');
-                    
-                            const moveMap = {
-                                'swing':         'MG',
-                                'updown':        'MU',
-                                'tiptoeSwing':   'MT',
-                                'jitter':        'MJ',
-                                'ascendingTurn': 'MA'
-                            };
-                            const cmd = moveMap[movement];
-                            if (!cmd) return [''];
-                            return [cmd + speed + ',' + size];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('M');
+                                                            }
+                                                            const movement = String(block.getFieldValue('otto_do_movement') || '');
+                                                            const speed    = String(block.getFieldValue('otto_move_speed')  || '1000');
+                                                            const size     = String(block.getFieldValue('otto_dance_size')  || '15');
+                                                    
+                                                            const moveMap = {
+                                                                'swing':         'MG',
+                                                                'updown':        'MU',
+                                                                'tiptoeSwing':   'MT',
+                                                                'jitter':        'MJ',
+                                                                'ascendingTurn': 'MA'
+                                                            };
+                                                            const cmd = moveMap[movement];
+                                                            if (!cmd) return [''];
+                                                            return [cmd + speed + ',' + size];
+                                                        };
 
     registry['bipedal_gesture'] = function (block, exporter) {
-                            const gestureVal = String(block.getFieldValue('otto_gesture') || '');
-                            const gstMap = {
-                                '1': 'GHappy', '2': 'GSuperHappy', '3': 'GSad', '4': 'GSleeping',
-                                '5': 'GFart', '6': 'GConfused', '7': 'GLove', '8': 'GAngry',
-                                '9': 'GFretful', '10': 'GMagic', '11': 'GWave', '12': 'GVictory',
-                                '13': 'GFail'
-                            };
-                            const cmd = gstMap[gestureVal] || gestureVal;
-                            return [cmd];
-                        };
+                                                            const gestureVal = String(block.getFieldValue('otto_gesture') || '');
+                                                            const gstMap = {
+                                                                '1': 'GHappy', '2': 'GSuperHappy', '3': 'GSad', '4': 'GSleeping',
+                                                                '5': 'GFart', '6': 'GConfused', '7': 'GLove', '8': 'GAngry',
+                                                                '9': 'GFretful', '10': 'GMagic', '11': 'GWave', '12': 'GVictory',
+                                                                '13': 'GFail'
+                                                            };
+                                                            const cmd = gstMap[gestureVal] || gestureVal;
+                                                            return [cmd];
+                                                        };
 
     registry['bipedal_home'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('M');
-                            }
-                            return ['MH'];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('M');
+                                                            }
+                                                            return ['MH'];
+                                                        };
 
     registry['bipedal_move'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('M');
-                            }
-                            const dir   = String(block.getFieldValue('otto_move_sens')  || '');
-                            const speed = String(block.getFieldValue('otto_move_speed') || '1000');
-                    
-                            const dirMap = {
-                                'FORWARD':    'MF',
-                                'BACKWARD':   'MB',
-                                'LEFT':       'ML',
-                                'RIGHT':      'MR',
-                                'BENDLEFT':   'MBL',
-                                'BENDRIGHT':  'MBR',
-                                'SHAKELEFT':  'MSL',
-                                'SHAKERIGHT': 'MSR',
-                                'jump':       'MJ'
-                            };
-                            const cmd = dirMap[dir];
-                            if (!cmd) return [''];
-                            return [cmd + speed];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('M');
+                                                            }
+                                                            const dir   = String(block.getFieldValue('otto_move_sens')  || '');
+                                                            const speed = String(block.getFieldValue('otto_move_speed') || '1000');
+                                                    
+                                                            const dirMap = {
+                                                                'FORWARD':    'MF',
+                                                                'BACKWARD':   'MB',
+                                                                'LEFT':       'ML',
+                                                                'RIGHT':      'MR',
+                                                                'BENDLEFT':   'MBL',
+                                                                'BENDRIGHT':  'MBR',
+                                                                'SHAKELEFT':  'MSL',
+                                                                'SHAKERIGHT': 'MSR',
+                                                                'jump':       'MJ'
+                                                            };
+                                                            const cmd = dirMap[dir];
+                                                            if (!cmd) return [''];
+                                                            return [cmd + speed];
+                                                        };
 
     registry['bipedal_rgb_blue'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('E');
-                            }
-                            const state = String(block.getFieldValue('STATE') || 'LOW');
-                            return [state === 'HIGH' ? 'EBN' : 'EBF'];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('E');
+                                                            }
+                                                            const state = String(block.getFieldValue('STATE') || 'LOW');
+                                                            return [state === 'HIGH' ? 'EBN' : 'EBF'];
+                                                        };
 
     registry['bipedal_rgb_green'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('E');
-                            }
-                            const state = String(block.getFieldValue('STATE') || 'LOW');
-                            return [state === 'HIGH' ? 'EGN' : 'EGF'];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('E');
+                                                            }
+                                                            const state = String(block.getFieldValue('STATE') || 'LOW');
+                                                            return [state === 'HIGH' ? 'EGN' : 'EGF'];
+                                                        };
 
     registry['bipedal_rgb_red'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('E');
-                            }
-                            const state = String(block.getFieldValue('STATE') || 'LOW');
-                            return [state === 'HIGH' ? 'ERN' : 'ERF'];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('E');
+                                                            }
+                                                            const state = String(block.getFieldValue('STATE') || 'LOW');
+                                                            return [state === 'HIGH' ? 'ERN' : 'ERF'];
+                                                        };
 
     registry['bipedal_setup'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('M');
-                            }
-                            return [''];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('M');
+                                                            }
+                                                            return [''];
+                                                        };
 
     registry['bipedal_smooth'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('M');
-                            }
-                            return ['MDSM'];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('M');
+                                                            }
+                                                            return ['MDSM'];
+                                                        };
 
     registry['OLED_clear'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('N');
-                            }
-                            return ['NC'];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('N');
+                                                            }
+                                                            return ['NC'];
+                                                        };
 
     registry['OLED_cust'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('N');
-                            }
-                            return [''];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('N');
+                                                            }
+                                                            return [''];
+                                                        };
 
     registry['speaker_init'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('A');
-                            }
-                            return [''];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('A');
+                                                            }
+                                                            return [''];
+                                                        };
 
     registry['ultrasonic_distance'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('U');
-                            }
-                            return ['UR'];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('U');
+                                                            }
+                                                            return ['UR'];
+                                                        };
 
     registry['ultrasonic_sensor'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('U');
-                            }
-                            return [''];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('U');
+                                                            }
+                                                            return [''];
+                                                        };
 
     registry['VOICE_play'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('A');
-                            }
-                            const voice = String(block.getFieldValue('VOICE_ID') || '');
-                            const voiceMap = {
-                                'HI_I_AM_EMMI': 'AP1',
-                                'OBSTACLE':     'AP4'
-                            };
-                            return [voiceMap[voice] || 'AP1'];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('A');
+                                                            }
+                                                            const voice = String(block.getFieldValue('VOICE_ID') || '');
+                                                            const voiceMap = {
+                                                                'HI_I_AM_EMMI': 'AP1',
+                                                                'OBSTACLE':     'AP4'
+                                                            };
+                                                            return [voiceMap[voice] || 'AP1'];
+                                                        };
 
     registry['VOICE_stop'] = function (block, exporter) {
-                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                exporter.addInitToken('A');
-                            }
-                            return ['AS'];
-                        };
+                                                            if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                exporter.addInitToken('A');
+                                                            }
+                                                            return ['AS'];
+                                                        };
 }(typeof window !== "undefined" ? window : globalThis));

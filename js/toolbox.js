@@ -1297,12 +1297,14 @@ function getBoardFirmwareConfig() {
             "firmwareUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-v2/firmware.bin",
             "partitionsUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-v2/partitions.bin",
             "bootloaderUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-v2/bootloader.bin",
+            "bootappUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-v2/boot_app0.bin",
             "versionUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-v2/version.txt"
         },
         "emmi-v1": {
             "firmwareUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-bipedal/firmware.bin",
             "partitionsUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-bipedal/partitions.bin",
             "bootloaderUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-bipedal/bootloader.bin",
+            "bootappUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-bipedal/boot_app0.bin",
             "versionUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-bipedal/version.txt"
         }
     };
