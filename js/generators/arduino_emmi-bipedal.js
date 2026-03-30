@@ -227,7 +227,7 @@ arduinoGenerator.forBlock['ir_detect_white'] = function(block) {
   var side = block.getFieldValue('SIDE');
   var pin = (side === 'LEFT') ? '34' : '35';
   arduinoGenerator.setupCode_['setup_analogResolutionESP32'] = 'analogReadResolution(12);\n';
-  var code = '(analogRead(' + pin + ') >= 3500)';
+  var code = '(analogRead(' + pin + ') >= 3895)';
   return [code, arduinoGenerator.ORDER_ATOMIC];
 };
 
@@ -236,7 +236,16 @@ arduinoGenerator.forBlock['ir_detect_black'] = function(block) {
   var side = block.getFieldValue('SIDE');
   var pin = (side === 'LEFT') ? '34' : '35';
   arduinoGenerator.setupCode_['setup_analogResolutionESP32'] = 'analogReadResolution(12);\n';
-  var code = '(analogRead(' + pin + ') < 3500)';
+  var code = '(analogRead(' + pin + ') <= 2500)';
+  return [code, arduinoGenerator.ORDER_ATOMIC];
+};
+
+// ─── IR DETECT NEITHER ────────────────────────────────────────────────────────
+arduinoGenerator.forBlock['ir_detect_neither'] = function(block) {
+  var side = block.getFieldValue('SIDE');
+  var pin = (side === 'LEFT') ? '34' : '35';
+  arduinoGenerator.setupCode_['setup_analogResolutionESP32'] = 'analogReadResolution(12);\n';
+  var code = '(analogRead(' + pin + ') > 2500 && analogRead(' + pin + ') < 3895)';
   return [code, arduinoGenerator.ORDER_ATOMIC];
 };
 

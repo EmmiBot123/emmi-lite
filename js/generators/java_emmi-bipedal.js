@@ -184,12 +184,19 @@ javaGenerator.forBlock['emmi_eyes_digital'] = function(block) {
 javaGenerator.forBlock['ir_detect_white'] = function(block) {
   const side = block.getFieldValue('SIDE');
   const pin = (side === 'LEFT') ? '34' : '35';
-  return ['(analogRead(' + pin + ') >= 3500)', javaGenerator.ORDER_ATOMIC];
+  return ['(analogRead(' + pin + ') >= 3895)', javaGenerator.ORDER_ATOMIC];
 };
 
 // ─── IR DETECT BLACK ──────────────────────────────────────────────────────────
 javaGenerator.forBlock['ir_detect_black'] = function(block) {
   const side = block.getFieldValue('SIDE');
   const pin = (side === 'LEFT') ? '34' : '35';
-  return ['(analogRead(' + pin + ') < 3500)', javaGenerator.ORDER_ATOMIC];
+  return ['(analogRead(' + pin + ') <= 2500)', javaGenerator.ORDER_ATOMIC];
+};
+
+// ─── IR DETECT NEITHER ────────────────────────────────────────────────────────
+javaGenerator.forBlock['ir_detect_neither'] = function(block) {
+  const side = block.getFieldValue('SIDE');
+  const pin = (side === 'LEFT') ? '34' : '35';
+  return ['(analogRead(' + pin + ') > 2500 && analogRead(' + pin + ') < 3895)', javaGenerator.ORDER_ATOMIC];
 };

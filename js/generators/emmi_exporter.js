@@ -525,6 +525,11 @@
                     const bSide = block.getFieldValue('SIDE');
                     return bSide === 'LEFT' ? 'ILB' : 'IRB';
                 }
+                case 'ir_detect_neither': {
+                    this.addInitToken('K');
+                    const nSide = block.getFieldValue('SIDE');
+                    return nSide === 'LEFT' ? 'ILN' : 'IRN';
+                }
                 case 'bluetooth_serial_available':
                     return 'R(A)';
                 case 'bluetooth_serial_read_byte':

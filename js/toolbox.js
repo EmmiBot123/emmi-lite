@@ -449,6 +449,10 @@ function getEmmiBipedalCategories() {
                 {
                     "kind": "block",
                     "type": "ir_detect_black"
+                },
+                {
+                    "kind": "block",
+                    "type": "ir_detect_neither"
                 }
             ]
         },

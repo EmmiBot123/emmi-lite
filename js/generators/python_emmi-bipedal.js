@@ -197,7 +197,7 @@ pythonGenerator.forBlock['ir_detect_white'] = function(block) {
   const side = block.getFieldValue('SIDE');
   const pin = (side === 'LEFT') ? '34' : '35';
   pythonGenerator.definitions_['ir_adc_' + pin] = 'ir_' + pin + ' = ADC(Pin(' + pin + '))\nir_' + pin + '.atten(ADC.ATTN_11DB)';
-  var code = '(ir_' + pin + '.read() >= 3500)';
+  var code = '(ir_' + pin + '.read() >= 3895)';
   return [code, pythonGenerator.ORDER_ATOMIC];
 };
 
@@ -207,6 +207,16 @@ pythonGenerator.forBlock['ir_detect_black'] = function(block) {
   const side = block.getFieldValue('SIDE');
   const pin = (side === 'LEFT') ? '34' : '35';
   pythonGenerator.definitions_['ir_adc_' + pin] = 'ir_' + pin + ' = ADC(Pin(' + pin + '))\nir_' + pin + '.atten(ADC.ATTN_11DB)';
-  var code = '(ir_' + pin + '.read() < 3500)';
+  var code = '(ir_' + pin + '.read() <= 2500)';
+  return [code, pythonGenerator.ORDER_ATOMIC];
+};
+
+// ─── IR DETECT NEITHER ────────────────────────────────────────────────────────
+pythonGenerator.forBlock['ir_detect_neither'] = function(block) {
+  pythonGenerator.imports_['machine_adc'] = 'from machine import ADC, Pin';
+  const side = block.getFieldValue('SIDE');
+  const pin = (side === 'LEFT') ? '34' : '35';
+  pythonGenerator.definitions_['ir_adc_' + pin] = 'ir_' + pin + ' = ADC(Pin(' + pin + '))\nir_' + pin + '.atten(ADC.ATTN_11DB)';
+  var code = '(2500 < ir_' + pin + '.read() < 3895)';
   return [code, pythonGenerator.ORDER_ATOMIC];
 };

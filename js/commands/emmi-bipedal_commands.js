@@ -183,6 +183,11 @@
             return [side === 'LEFT' ? 'ILW' : 'IRW'];
         };
 
+    registry['ir_detect_neither'] = function (block, exporter) {
+            const side = String(block.getFieldValue('SIDE') || 'LEFT');
+            return [side === 'LEFT' ? 'ILN' : 'IRN'];
+        };
+
     registry['linefollower_ir_left'] = function (block, exporter) {
                                                                         const pin = String(block.getFieldValue('PIN_IR') || '34');
                                                                         // Map to digital/analog pin read in expression context

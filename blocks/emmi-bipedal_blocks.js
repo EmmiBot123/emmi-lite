@@ -78,6 +78,23 @@ Blockly.Blocks['ir_detect_black'] = {
     }
 };
 
+Blockly.Blocks['ir_detect_neither'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldImage("media/linefollow.png",33,33))
+            .appendField("IR detect")
+            .appendField(new Blockly.FieldDropdown([
+                ["left", "LEFT"],
+                ["right", "RIGHT"]
+            ]), "SIDE")
+            .appendField("🔶 neither");
+        this.setOutput(true, "Boolean");
+        this.setInputsInline(true);
+        this.setColour("#FF8F00");
+        this.setTooltip('Returns true if the IR sensor detects NEITHER white nor black (middle range)');
+    }
+};
+
 Blockly.Blocks['flipper_wheels_init'] = {
     init: function() {
         this.appendDummyInput()
