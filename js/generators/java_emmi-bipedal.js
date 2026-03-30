@@ -179,3 +179,17 @@ javaGenerator.forBlock['emmi_eyes_digital'] = function(block) {
 
   return '        gpio.digitalWrite(' + pinNum + ', GPIO.' + state + ');\n';
 };
+
+// ─── IR DETECT WHITE ──────────────────────────────────────────────────────────
+javaGenerator.forBlock['ir_detect_white'] = function(block) {
+  const side = block.getFieldValue('SIDE');
+  const pin = (side === 'LEFT') ? '34' : '35';
+  return ['(analogRead(' + pin + ') >= 3500)', javaGenerator.ORDER_ATOMIC];
+};
+
+// ─── IR DETECT BLACK ──────────────────────────────────────────────────────────
+javaGenerator.forBlock['ir_detect_black'] = function(block) {
+  const side = block.getFieldValue('SIDE');
+  const pin = (side === 'LEFT') ? '34' : '35';
+  return ['(analogRead(' + pin + ') < 3500)', javaGenerator.ORDER_ATOMIC];
+};

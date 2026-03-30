@@ -502,11 +502,29 @@
                     this.addInitToken('A');
                     return 'AR';
                 case 'ultrasonic_distance':
+                case 'flipper_ultrasonic_distance':
                     this.addInitToken('U');
                     return 'UR';
                 case 'ultrasonic_sensor':
+                case 'flipper_ultrasonic_init':
                     this.addInitToken('U');
                     return 'UR';
+                case 'flipper_touch_read':
+                    this.addInitToken('T');
+                    return 'TR';
+                case 'flipper_light_read':
+                    this.addInitToken('V');
+                    return 'VR';
+                case 'ir_detect_white': {
+                    this.addInitToken('K');
+                    const wSide = block.getFieldValue('SIDE');
+                    return wSide === 'LEFT' ? 'ILW' : 'IRW';
+                }
+                case 'ir_detect_black': {
+                    this.addInitToken('K');
+                    const bSide = block.getFieldValue('SIDE');
+                    return bSide === 'LEFT' ? 'ILB' : 'IRB';
+                }
                 case 'bluetooth_serial_available':
                     return 'R(A)';
                 case 'bluetooth_serial_read_byte':

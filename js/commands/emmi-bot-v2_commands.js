@@ -9,61 +9,61 @@
     const registry = globalScope.emmiCommandGenerator.forBlock;
 
     registry['buzzer_play_note'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            const noteFreq = block.getFieldValue('NOTE') || '440';
-                                                            const noteTempo = block.getFieldValue('TEMPO') || '250';
-                                                            return ['BF' + noteFreq, exporter.mapDelayValue ? exporter.mapDelayValue(noteTempo) : ('D' + noteTempo), 'BS'];
-                                                        };
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('B');
+                                                                        }
+                                                                        const noteFreq = block.getFieldValue('NOTE') || '440';
+                                                                        const noteTempo = block.getFieldValue('TEMPO') || '250';
+                                                                        return ['BF' + noteFreq, exporter.mapDelayValue ? exporter.mapDelayValue(noteTempo) : ('D' + noteTempo), 'BS'];
+                                                                    };
 
     registry['buzzer_play_rtttl'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            const mel = block.getFieldValue('MELODY') || 'StarWars';
-                                                            return ['BP' + mel];
-                                                        };
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('B');
+                                                                        }
+                                                                        const mel = block.getFieldValue('MELODY') || 'StarWars';
+                                                                        return ['BP' + mel];
+                                                                    };
 
     registry['buzzer_play_rtttl_custom'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            const customMel = exporter.serializeValueInput(block, 'MELODY', 'S') || '"StarWars"';
-                                                            return ['BP' + customMel];
-                                                        };
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('B');
+                                                                        }
+                                                                        const customMel = exporter.serializeValueInput(block, 'MELODY', 'S') || '"StarWars"';
+                                                                        return ['BP' + customMel];
+                                                                    };
 
     registry['buzzer_play_tone'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            const toneFreq = exporter.serializeValueInput(block, 'FREQ', 'F') || '440';
-                                                            const toneDur = exporter.serializeValueInput(block, 'DURATION', 'I') || '100';
-                                                            return ['BF' + toneFreq, exporter.mapDelayValue ? exporter.mapDelayValue(toneDur) : ('D' + toneDur), 'BS'];
-                                                        };
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('B');
+                                                                        }
+                                                                        const toneFreq = exporter.serializeValueInput(block, 'FREQ', 'F') || '440';
+                                                                        const toneDur = exporter.serializeValueInput(block, 'DURATION', 'I') || '100';
+                                                                        return ['BF' + toneFreq, exporter.mapDelayValue ? exporter.mapDelayValue(toneDur) : ('D' + toneDur), 'BS'];
+                                                                    };
 
     registry['buzzer_stop'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            return ['BS'];
-                                                        };
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('B');
+                                                                        }
+                                                                        return ['BS'];
+                                                                    };
 
     registry['emmi_touch_read'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('T');
-                                                            }
-                                                    
-                                                            const pin = String(block.getFieldValue('PIN') || '');
-                                                    
-                                                            const tokenMap = { 'PIN_TOUCH': 'TR' };
-                                                            return [tokenMap[pin] || ''];
-                                                        };
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('T');
+                                                                        }
+                                                                
+                                                                        const pin = String(block.getFieldValue('PIN') || '');
+                                                                
+                                                                        const tokenMap = { 'PIN_TOUCH': 'TR' };
+                                                                        return [tokenMap[pin] || ''];
+                                                                    };
 
     registry['emmi_wheels_simple'] = function (block, exporter) {
-                                                            const direction = String(block.getFieldValue('DIRECTION') || '');
-                                                    
-                                                            const tokenMap = { 'FORWARD': 'MF', 'BACKWARD': 'MB', 'LEFT': 'ML', 'RIGHT': 'MR', 'STOP': 'MS' };
-                                                            return [tokenMap[direction] || ''];
-                                                        };
+                                                                        const direction = String(block.getFieldValue('DIRECTION') || '');
+                                                                
+                                                                        const tokenMap = { 'FORWARD': 'MF', 'BACKWARD': 'MB', 'LEFT': 'ML', 'RIGHT': 'MR', 'STOP': 'MS' };
+                                                                        return [tokenMap[direction] || ''];
+                                                                    };
 }(typeof window !== "undefined" ? window : globalThis));

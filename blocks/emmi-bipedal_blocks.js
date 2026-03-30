@@ -8,295 +8,6 @@ function _emmi_msg(key, fallback) {
     return (typeof Blockly !== 'undefined' && Blockly.Msg && Blockly.Msg[key]) ? Blockly.Msg[key] : fallback;
 }
 
-Blockly.Blocks['otto_configuration'] = {
-    init: function() {
-        var card = window.localStorage.card || 'mrtnodev1';
-        this.appendDummyInput("")
-            .appendField(new Blockly.FieldImage('media/otto_emoji.png', 33, 33, "*"))
-            .appendField(_emmi_msg('OTTO_HOME_TEXT', 'setup ') + _emmi_msg('OTTO_BIPED_TEXT', 'biped'));
-        this.appendDummyInput()
-            .appendField(_emmi_msg('OTTO9_CALIBRATION_LEG', 'leg ') + _emmi_msg('left', 'left')).setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(new Blockly.FieldDropdown([["MOTOR1","MOTOR1"], ["MOTOR2","MOTOR2"], ["MOTOR3","MOTOR3"], ["MOTOR4","MOTOR4"], ["OUT1","OUT1"], ["OUT2","OUT2"], ["OUT3","OUT3"], ["OUT4","OUT4"], ["2","2"], ["3","3"], ["4","4"], ["5","5"]]), "PIN_YL");
-        this.appendDummyInput()
-            .appendField(_emmi_msg('right', 'right')).setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(new Blockly.FieldDropdown([["MOTOR1","MOTOR1"], ["MOTOR2","MOTOR2"], ["MOTOR3","MOTOR3"], ["MOTOR4","MOTOR4"], ["OUT1","OUT1"], ["OUT2","OUT2"], ["OUT3","OUT3"], ["OUT4","OUT4"], ["3","3"], ["2","2"], ["4","4"], ["5","5"]]), "PIN_YR");
-        this.appendDummyInput()
-            .appendField(_emmi_msg('OTTO9_CALIBRATION_FOOT', 'foot ') + _emmi_msg('left', 'left')).setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(new Blockly.FieldDropdown([["MOTOR1","MOTOR1"], ["MOTOR2","MOTOR2"], ["MOTOR3","MOTOR3"], ["MOTOR4","MOTOR4"], ["OUT1","OUT1"], ["OUT2","OUT2"], ["OUT3","OUT3"], ["OUT4","OUT4"], ["4","4"], ["2","2"], ["3","3"], ["5","5"]]), "PIN_RL");
-        this.appendDummyInput()
-            .appendField(_emmi_msg('right', 'right')).setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(new Blockly.FieldDropdown([["MOTOR1","MOTOR1"], ["MOTOR2","MOTOR2"], ["MOTOR3","MOTOR3"], ["MOTOR4","MOTOR4"], ["OUT1","OUT1"], ["OUT2","OUT2"], ["OUT3","OUT3"], ["OUT4","OUT4"], ["5","5"], ["2","2"], ["3","3"], ["4","4"]]), "PIN_RR");
-        this.appendDummyInput()
-            .appendField(_emmi_msg('OTTO9_BUZZER', 'buzzer')).setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(new Blockly.FieldDropdown([["26","26"], ["13","13"], ["12","12"], ["16","16"], ["17","17"]]), "PIN_Buzzer");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto_home'] = {
-    init: function() {
-        this.appendDummyInput("")
-            .appendField(new Blockly.FieldImage('media/otto_plus.png', 22, 22, "*"))
-            .appendField(_emmi_msg('OTTO9_HOME_TEXT', 'home'));
-        this.setInputsInline(false);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto_calibration'] = {
-    init: function() {
-        this.appendValueInput("LL").setCheck("Number").appendField("🦿 " + _emmi_msg('OTTO9_CALIBRATION', 'calibrate ') + _emmi_msg('OTTO9_CALIBRATION_LEG', 'leg ') + _emmi_msg('left', 'left')).setAlign(Blockly.ALIGN_RIGHT);
-        this.appendValueInput("RL").setCheck("Number").appendField(_emmi_msg('right', 'right')).setAlign(Blockly.ALIGN_RIGHT);
-        this.appendValueInput("LF").setCheck("Number").appendField(_emmi_msg('OTTO9_CALIBRATION_FOOT', 'foot ') + _emmi_msg('left', 'left')).setAlign(Blockly.ALIGN_RIGHT);
-        this.appendValueInput("RF").setCheck("Number").appendField(_emmi_msg('right', 'right')).setAlign(Blockly.ALIGN_RIGHT);
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto_eeprom'] = {
-    init: function() {
-        this.appendDummyInput("").appendField("💾 " + _emmi_msg('OTTO9_EEPROM_TEXT', 'save trims on EEPROM'));
-        this.setInputsInline(false);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#ff6600");
-    }
-};
-
-Blockly.Blocks['otto_movelegs'] = {
-    init: function() {
-        this.appendDummyInput("").appendField("🦿 " + _emmi_msg('OTTO9_MOVE_TEXT', 'move'));
-        this.appendValueInput("PIN_YL").setCheck("Number").appendField(_emmi_msg('OTTO9_CALIBRATION_LEG', 'leg ') + _emmi_msg('left', 'left'));
-        this.appendValueInput("PIN_YR").setCheck("Number").appendField(_emmi_msg('right', 'right'));
-        this.appendValueInput("PIN_RL").setCheck("Number").appendField(_emmi_msg('OTTO9_CALIBRATION_FOOT', 'foot ') + _emmi_msg('left', 'left'));
-        this.appendValueInput("PIN_RR").setCheck("Number").appendField(_emmi_msg('right', 'right'));
-        this.appendValueInput("TEMPO").setCheck("Number").appendField(_emmi_msg('OTTO9_MOVE_SPEED_TEXT', 'speed'));
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto_moveservos'] = {
-    init: function() {
-        this.appendDummyInput("").appendField("🦿 " + _emmi_msg('OTTO9_MOVE_TEXT', 'move'));
-        this.appendValueInput("Period").setCheck("Number").appendField(_emmi_msg('OTTO9_MOVE_SPEED_TEXT', 'speed'));
-        this.appendValueInput("Pos").setCheck("Number").appendField("Positions");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto_move'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldImage('media/otto_bend.png', 22, 22, "*"))
-            .appendField(_emmi_msg('OTTO9_MOVE_TEXT', 'move'))
-            .appendField(new Blockly.FieldDropdown([
-                [_emmi_msg('OTTO9_MOVE_CHOICE_FWD', '↑ forward'), "FORWARD"],
-                [_emmi_msg('OTTO9_MOVE_CHOICE_BWD', '↓ backward'), "BACKWARD"],
-                [_emmi_msg('OTTO9_MOVE_CHOICE_LEFT', '← left'), "LEFT"],
-                [_emmi_msg('OTTO9_MOVE_CHOICE_RIGHT', '→ right'), "RIGHT"],
-                [_emmi_msg('OTTO9_MOVE_CHOICE_BENDLEFT', 'bend left'), "BENDLEFT"],
-                [_emmi_msg('OTTO9_MOVE_CHOICE_BENDRIGHT', 'bend right'), "BENDRIGHT"],
-                [_emmi_msg('OTTO9_MOVE_CHOICE_SHAKELEFT', 'shake left leg'), "SHAKELEFT"],
-                [_emmi_msg('OTTO9_MOVE_CHOICE_SHAKERIGHT', 'shake right leg'), "SHAKERIGHT"],
-                [_emmi_msg('OTTO9_MOVE_CHOICE_JUMP', 'jump'), "jump"]
-            ]), "otto_move_sens");
-        this.appendDummyInput().setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(_emmi_msg('OTTO9_MOVE_SPEED_TEXT', 'speed'))
-            .appendField(new Blockly.FieldDropdown([
-                [_emmi_msg('OTTO9_SPEED_NORMAL', 'normal'), "1000"],
-                [_emmi_msg('OTTO9_SPEED_FAST', 'fast'), "500"],
-                [_emmi_msg('OTTO9_SPEED_VERYFAST', 'very fast'), "250"]
-            ]), "otto_move_speed");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto_dance'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldImage('media/otto_moonwalk.png', 22, 22, "*"))
-            .appendField(_emmi_msg('OTTO9_DANCE_TEXT', 'dance'))
-            .appendField(new Blockly.FieldDropdown([
-                [_emmi_msg('OTTO9_DANCE_CHOICE_MWL', 'moonwalk ←'), "moonwalkerLEFT"],
-                [_emmi_msg('OTTO9_DANCE_CHOICE_MWR', 'moonwalk →'), "moonwalkerRIGHT"],
-                [_emmi_msg('OTTO9_DANCE_CHOICE_CRL', 'crossing ←'), "crusaitoLEFT"],
-                [_emmi_msg('OTTO9_DANCE_CHOICE_CRR', 'crossing →'), "crusaitoRIGHT"],
-                [_emmi_msg('OTTO9_DANCE_CHOICE_FLF', 'flapping ↑'), "flappingFRONT"],
-                [_emmi_msg('OTTO9_DANCE_CHOICE_FLB', 'flapping ↓'), "flappingBACK"]
-            ]), "otto_dance_movement");
-        this.appendDummyInput().setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(_emmi_msg('OTTO9_MOVE_SPEED_TEXT', 'speed'))
-            .appendField(new Blockly.FieldDropdown([
-                [_emmi_msg('OTTO9_SPEED_NORMAL', 'normal'), "1000"],
-                [_emmi_msg('OTTO9_SPEED_FAST', 'fast'), "500"],
-                [_emmi_msg('OTTO9_SPEED_VERYFAST', 'very fast'), "250"]
-            ]), "otto_move_speed");
-        this.appendDummyInput().setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(_emmi_msg('OTTO9_DANCE_SIZE_TEXT', 'size'))
-            .appendField(new Blockly.FieldDropdown([
-                [_emmi_msg('OTTO9_SIZE_NORMAL', 'normal'), "15"],
-                [_emmi_msg('OTTO9_SIZE_BIG', 'big'), "25"],
-                [_emmi_msg('OTTO9_SIZE_SMALL', 'small'), "5"]
-            ]), "otto_dance_size");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto_do'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldImage('media/otto_do.png', 22, 22, "*"))
-            .appendField(_emmi_msg('OTTO9_DO_TEXT', 'do'))
-            .appendField(new Blockly.FieldDropdown([
-                [_emmi_msg('OTTO9_DO_SWING', 'swing'), "swing"],
-                [_emmi_msg('OTTO9_DO_UPDOWN', 'updown'), "updown"],
-                [_emmi_msg('OTTO9_DO_TIPTOE', 'tiptoeSwing'), "tiptoeSwing"],
-                [_emmi_msg('OTTO9_DO_JITTER', 'jitter'), "jitter"],
-                [_emmi_msg('OTTO9_DO_ASCEND', 'ascendingTurn'), "ascendingTurn"]
-            ]), "otto_do_movement");
-        this.appendDummyInput().setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(_emmi_msg('OTTO9_MOVE_SPEED_TEXT', 'speed'))
-            .appendField(new Blockly.FieldDropdown([
-                [_emmi_msg('OTTO9_SPEED_NORMAL', 'normal'), "1000"],
-                [_emmi_msg('OTTO9_SPEED_FAST', 'fast'), "500"],
-                [_emmi_msg('OTTO9_SPEED_VERYFAST', 'very fast'), "250"]
-            ]), "otto_move_speed");
-        this.appendDummyInput().setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(_emmi_msg('OTTO9_DANCE_SIZE_TEXT', 'size'))
-            .appendField(new Blockly.FieldDropdown([
-                [_emmi_msg('OTTO9_SIZE_NORMAL', 'normal'), "15"],
-                [_emmi_msg('OTTO9_SIZE_BIG', 'big'), "25"],
-                [_emmi_msg('OTTO9_SIZE_SMALL', 'small'), "5"]
-            ]), "otto_dance_size");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto9_smooth'] = {
-    init: function() {
-        this.appendDummyInput().appendField(new Blockly.FieldImage('media/smooth.png', 33, 33, "*")).appendField('Dance smooth criminal');
-        this.setInputsInline(false);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto_gesture'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldImage('media/otto_emoji.png', 22, 22, "*"))
-            .appendField(_emmi_msg('OTTO9_GESTURE_TEXT', 'gesture'))
-            .appendField(new Blockly.FieldDropdown([
-                ["🤩 happy1", "1"], ["🙂 happy2", "2"], ["😢 sad", "3"], ["😴 sleeping", "4"], 
-                ["😕 confused", "6"], ["😍 love", "7"], ["😡 angry", "8"], ["😖 fretful", "9"], 
-                ["🪄 magic", "10"], ["👋 wave", "11"], ["✌ victory", "12"], ["👎 fail", "13"], ["💨 fart", "5"]
-            ]), "otto_gesture");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
-Blockly.Blocks['otto_sound'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldImage('media/otto_music.png', 22, 22, "*"))
-            .appendField(_emmi_msg('OTTO9_SOUND_TEXT', 'sound'))
-            .appendField(new Blockly.FieldDropdown([
-                ["connection", "1"], ["disconnection", "2"], ["surprise", "3"], ["OhOoh", "4"], ["OhOoh2", "5"], 
-                ["cuddly", "6"], ["sleeping", "7"], ["happy", "8"], ["superHappy", "9"], ["happy_short", "10"], 
-                ["sad", "11"], ["confused", "12"], ["mode1", "16"], ["mode2", "17"], ["mode3", "18"], 
-                ["buttonPushed", "19"], ["fart1", "13"], ["fart2", "14"], ["fart3", "15"]
-            ]), "otto_sound");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#FF63BB");
-    }
-};
-
-Blockly.Blocks['otto_tone'] = {
-    init: function() {
-        this.appendDummyInput().appendField("🎼")
-            .appendField(new Blockly.FieldDropdown([
-                ["C₄ | Do₄", "262"], ["D₄ | Re₄", "294"], ["E₄ | Mi₄", "330"], ["F₄ | Fa₄", "349"], ["G₄ | Sol₄", "392"], 
-                ["A₄ | La₄", "440"], ["B₄ | Si₄", "494"], ["C₅ | Do₅", "523"], ["D₅ | Re₅", "587"], ["E₅ | Mi₅", "659"], 
-                ["F₅ | Fa₅", "698"], ["G₅ | Sol₅", "784"], ["A₅ | La₅", "880"], ["B₅ | Si₅", "988"], ["C₆ | Do₆", "1047"], 
-                ["D₆ | Re₆", "1175"], ["E₆ | Mi₆", "1319"], ["F₆ | Fa₆", "1397"], ["G₆ | Sol₆", "1568"], ["A₆ | La₆", "1760"], 
-                ["B₆ | Si₆", "1976"]
-            ]), "otto_note");
-        this.appendDummyInput().setAlign(Blockly.ALIGN_RIGHT).appendField(" ")
-            .appendField(new Blockly.FieldDropdown([["\u266B", "125"], ["\u266A", "250"], ["\u2669", "500"], ["𝅗𝅥", "1000"], ["𝅝", "2000"]]), "otto_note_duration");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#FF63BB");
-    }
-};
-
-Blockly.Blocks['otto_tonehz'] = {
-    init: function() {
-        this.appendDummyInput().appendField("🎼 Hz");
-        this.appendValueInput("Hz1");
-        this.appendValueInput("duration").setCheck("Number").appendField("⏰");
-        this.appendValueInput("silent").setCheck("Number").appendField("🔇");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#FF63BB");
-    }
-};
-
-Blockly.Blocks['otto_bendtone'] = {
-    init: function() {
-        this.appendDummyInput().appendField("🎼 Hz1");
-        this.appendValueInput("Hz1");
-        this.appendValueInput("Hz2").appendField("Hz2");
-        this.appendValueInput("prop").setCheck("Number").appendField("P");
-        this.appendValueInput("duration").setCheck("Number").appendField("⏰");
-        this.appendValueInput("silent").setCheck("Number").appendField("🔇");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#FF63BB");
-    }
-};
-
-Blockly.Blocks['otto9_app'] = {
-    init: function() {
-        this.appendDummyInput().appendField(new Blockly.FieldImage('media/bt.png', 33, 33, "*")).appendField('App code');
-        this.setInputsInline(false);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);
-        this.setColour("#4759F5");
-    }
-};
-
 Blockly.Blocks['linefollower_ir_left'] = {
     init: function() {
         this.appendDummyInput()
@@ -330,6 +41,40 @@ Blockly.Blocks['linefollower_ir_right'] = {
         this.setInputsInline(true);
         this.setColour("#54BCF7");
         this.setTooltip('Right infrared line follower sensor value'); 
+    }
+};
+
+Blockly.Blocks['ir_detect_white'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldImage("media/linefollow.png",33,33))
+            .appendField("IR detect")
+            .appendField(new Blockly.FieldDropdown([
+                ["left", "LEFT"],
+                ["right", "RIGHT"]
+            ]), "SIDE")
+            .appendField("⬜ white");
+        this.setOutput(true, "Boolean");
+        this.setInputsInline(true);
+        this.setColour("#388E3C");
+        this.setTooltip('Returns true if the IR sensor detects a WHITE surface');
+    }
+};
+
+Blockly.Blocks['ir_detect_black'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldImage("media/linefollow.png",33,33))
+            .appendField("IR detect")
+            .appendField(new Blockly.FieldDropdown([
+                ["left", "LEFT"],
+                ["right", "RIGHT"]
+            ]), "SIDE")
+            .appendField("⬛ black");
+        this.setOutput(true, "Boolean");
+        this.setInputsInline(true);
+        this.setColour("#388E3C");
+        this.setTooltip('Returns true if the IR sensor detects a BLACK surface');
     }
 };
 
@@ -407,3 +152,299 @@ Blockly.Blocks['OLED_eyes'] = {
     this.setHelpUrl('');
   }
 };
+
+// ===========================================
+// OLED Display
+// ===========================================
+
+Blockly.Blocks['flipper_oled_init'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldImage('media/oled.png', 33, 33, "*"))
+            .appendField("Init OLED 1.3'' I²C (ESP32)");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setColour("#B655F5");
+        this.setTooltip("Initializes the OLED on ESP32 Pins 21 (SDA) and 22 (SCL)");
+    }
+};
+
+Blockly.Blocks['flipper_oled_clear'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("👀 clear ✨");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setColour("#B655F5");
+        this.setTooltip("Clear the OLED display");
+    }
+};
+
+// ===========================================
+// RGB LED Controls
+// ===========================================
+
+Blockly.Blocks['flipper_rgb_red'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🔴 Red LED")
+            .appendField(_emmi_msg('EMMI_TO', 'to'))
+            .appendField(new Blockly.FieldDropdown([
+                [_emmi_msg('EMMI_ON', 'ON'), "HIGH"],
+                [_emmi_msg('EMMI_OFF', 'OFF'), "LOW"]
+            ]), "STATE");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour("#00838F");
+        this.setTooltip("Control the Red LED.");
+    }
+};
+
+Blockly.Blocks['flipper_rgb_green'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🟢 Green LED")
+            .appendField(_emmi_msg('EMMI_TO', 'to'))
+            .appendField(new Blockly.FieldDropdown([
+                [_emmi_msg('EMMI_ON', 'ON'), "HIGH"],
+                [_emmi_msg('EMMI_OFF', 'OFF'), "LOW"]
+            ]), "STATE");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour("#00838F");
+        this.setTooltip("Control the Green LED.");
+    }
+};
+
+Blockly.Blocks['flipper_rgb_blue'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🔵 Blue LED")
+            .appendField(_emmi_msg('EMMI_TO', 'to'))
+            .appendField(new Blockly.FieldDropdown([
+                [_emmi_msg('EMMI_ON', 'ON'), "HIGH"],
+                [_emmi_msg('EMMI_OFF', 'OFF'), "LOW"]
+            ]), "STATE");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour("#00838F");
+        this.setTooltip("Control the Blue LED.");
+    }
+};
+
+// ===========================================
+// Ultrasonic Sensor
+// ===========================================
+
+Blockly.Blocks['flipper_ultrasonic_init'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldImage("media/sensor_ultrasound.png", 33, 33, "*"))
+            .appendField("⚙️ #")
+            .appendField(new Blockly.FieldDropdown([['1','1'],['2','2'],['3','3'],['4','4']]), "US_NUMBER")
+            .appendField("ultrasonic trigger")
+            .appendField(new Blockly.FieldDropdown([
+                ["25", "25"], ["26", "26"], ["32", "32"], ["33", "33"],
+                ["2", "2"], ["4", "4"], ["5", "5"], ["12", "12"], ["13", "13"],
+                ["14", "14"], ["15", "15"], ["16", "16"], ["17", "17"], ["27", "27"]
+            ]), "PIN_TRIG");
+        this.appendDummyInput()
+            .appendField("echo")
+            .appendField(new Blockly.FieldDropdown([
+                ["25", "25"], ["26", "26"], ["32", "32"], ["33", "33"],
+                ["2", "2"], ["4", "4"], ["5", "5"], ["12", "12"], ["13", "13"],
+                ["14", "14"], ["15", "15"], ["16", "16"], ["17", "17"], ["27", "27"]
+            ]), "PIN_ECHO");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour("#54BCF7");
+        this.setTooltip("Setup ultrasonic sensor with trigger and echo pins.");
+    }
+};
+
+Blockly.Blocks['flipper_ultrasonic_distance'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldImage("media/sensor_ultrasound.png", 25, 15, "*"))
+            .appendField("⚙️ #")
+            .appendField(new Blockly.FieldDropdown([['1','1'],['2','2'],['3','3'],['4','4']]), "US_NUMBER")
+            .appendField("distance");
+        this.setColour("#54BCF7");
+        this.setInputsInline(false);
+        this.setOutput(true, "Number");
+        this.setTooltip("Ultrasonic distance in cm");
+    }
+};
+
+// ===========================================
+// Touch Sensor
+// ===========================================
+
+Blockly.Blocks['flipper_touch_read'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("👉 touch PIN")
+            .appendField(new Blockly.FieldDropdown([
+                ["TOUCH", "PIN_TOUCH"],
+                ["32", "32"], ["33", "33"], ["27", "27"], ["14", "14"], ["12", "12"], ["13", "13"]
+            ]), "PIN");
+        this.setOutput(true, "Boolean");
+        this.setColour("#FFC107");
+        this.setTooltip("Read digital state of touch sensor.");
+    }
+};
+
+// ===========================================
+// Light Sensor (LDR)
+// ===========================================
+
+Blockly.Blocks['flipper_light_read'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("💡 " + _emmi_msg('EMMI_ANALOG_READ_PIN', 'analog read PIN'))
+            .appendField(new Blockly.FieldDropdown([
+                ["LDR", "LDR"],
+                ["34", "34"], ["35", "35"], ["36", "36"], ["39", "39"], ["32", "32"], ["33", "33"]
+            ]), "PIN");
+        this.setOutput(true, "Number");
+        this.setColour("#FFA726");
+        this.setTooltip("Read light sensor (LDR) value.");
+    }
+};
+
+// ===========================================
+// Speaker
+// ===========================================
+
+Blockly.Blocks['flipper_speaker_init'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🔊 Speaker Init");
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setColour("#FF63BB");
+        this.setTooltip("Initialize speaker.");
+    }
+};
+
+Blockly.Blocks['flipper_speaker_play'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🔊 play")
+            .appendField(new Blockly.FieldDropdown([
+                ['Hi I am Emmi', 'HI_I_AM_EMMI'],
+                ['Obstacle detected', 'OBSTACLE']
+            ]), "VOICE_ID");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour("#FF63BB");
+        this.setTooltip("Play prerecorded voice message.");
+    }
+};
+
+Blockly.Blocks['flipper_speaker_stop'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🔊 stop sound");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour("#FF63BB");
+        this.setTooltip("Stop sound immediately.");
+    }
+};
+
+// ===========================================
+// Buzzer
+// ===========================================
+
+var FLIPPER_BUZZER_HUE = "#E91E63";
+
+var FLIPPER_BUZZER_PINS = [
+    ["BUZZER", "26"],
+    ["25", "25"], ["26", "26"], ["27", "27"], ["14", "14"]
+];
+
+var FLIPPER_BUZZER_NOTES = [
+    ["C4 (262Hz)", "262"], ["D4 (294Hz)", "294"], ["E4 (330Hz)", "330"],
+    ["F4 (349Hz)", "349"], ["G4 (392Hz)", "392"], ["A4 (440Hz)", "440"],
+    ["B4 (494Hz)", "494"], ["C5 (523Hz)", "523"], ["D5 (587Hz)", "587"],
+    ["E5 (659Hz)", "659"], ["F5 (698Hz)", "698"], ["G5 (784Hz)", "784"],
+    ["A5 (880Hz)", "880"], ["B5 (988Hz)", "988"]
+];
+
+var FLIPPER_BUZZER_TEMPOS = [
+    ["Eighth (125ms)", "125"], ["Quarter (250ms)", "250"],
+    ["Half (500ms)", "500"], ["Whole (1000ms)", "1000"]
+];
+
+Blockly.Blocks['flipper_buzzer_rtttl'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🎵 buzzer")
+            .appendField(new Blockly.FieldDropdown(FLIPPER_BUZZER_PINS), "PIN")
+            .appendField("play ring tone")
+            .appendField(new Blockly.FieldDropdown([
+                ["StarWars", "StarWars"], ["MahnaMahna", "MahnaMahna"],
+                ["MissionImp", "MissionImp"], ["Entertainer", "Entertainer"],
+                ["Muppets", "Muppets"], ["Flinstones", "Flinstones"],
+                ["YMCA", "YMCA"], ["Simpsons", "Simpsons"],
+                ["Indiana", "Indiana"], ["JingleBell", "JingleBell"],
+                ["SilentNight", "SilentNight"], ["AmazingGrace", "AmazingGrace"]
+            ]), "MELODY");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(FLIPPER_BUZZER_HUE);
+        this.setTooltip("Play a preset RTTTL ringtone melody on the buzzer.");
+    }
+};
+
+Blockly.Blocks['flipper_buzzer_note'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🎵 buzzer")
+            .appendField(new Blockly.FieldDropdown(FLIPPER_BUZZER_PINS), "PIN")
+            .appendField("play")
+            .appendField(new Blockly.FieldDropdown(FLIPPER_BUZZER_NOTES), "NOTE")
+            .appendField(new Blockly.FieldDropdown(FLIPPER_BUZZER_TEMPOS), "TEMPO");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(FLIPPER_BUZZER_HUE);
+        this.setTooltip("Play a musical note for a given duration.");
+    }
+};
+
+Blockly.Blocks['flipper_buzzer_tone'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🎵 buzzer")
+            .appendField(new Blockly.FieldDropdown(FLIPPER_BUZZER_PINS), "PIN")
+            .appendField("♪ frequency (Hz)")
+            .appendField(new Blockly.FieldNumber(880, 0), "FREQ")
+            .appendField("⊙ duration (ms)")
+            .appendField(new Blockly.FieldNumber(100, 0), "DURATION");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(FLIPPER_BUZZER_HUE);
+        this.setTooltip("Play a tone at a specific frequency for a given duration.");
+    }
+};
+
+Blockly.Blocks['flipper_buzzer_stop'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("🔇 stop sound on")
+            .appendField(new Blockly.FieldDropdown(FLIPPER_BUZZER_PINS), "PIN");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(FLIPPER_BUZZER_HUE);
+        this.setTooltip("Stop the buzzer / turn off tone.");
+    }
+};
+

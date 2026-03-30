@@ -8,258 +8,197 @@
     globalScope.emmiCommandGenerator = globalScope.emmiCommandGenerator || { forBlock: {} };
     const registry = globalScope.emmiCommandGenerator.forBlock;
 
+    registry['flipper_buzzer_note'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('B');
+            }
+            const noteFreq = block.getFieldValue('NOTE') || '440';
+            const noteTempo = block.getFieldValue('TEMPO') || '250';
+            return ['BF' + noteFreq, exporter.mapDelayValue ? exporter.mapDelayValue(noteTempo) : ('D' + noteTempo), 'BS'];
+        };
+
+    registry['flipper_buzzer_rtttl'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('B');
+            }
+            const mel = block.getFieldValue('MELODY') || 'StarWars';
+            return ['BP' + mel];
+        };
+
+    registry['flipper_buzzer_stop'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('B');
+            }
+            return ['BS'];
+        };
+
+    registry['flipper_buzzer_tone'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('B');
+            }
+            const toneFreq = String(block.getFieldValue('FREQ') || '880');
+            const toneDur = String(block.getFieldValue('DURATION') || '100');
+            return ['BF' + toneFreq, exporter.mapDelayValue ? exporter.mapDelayValue(toneDur) : ('D' + toneDur), 'BS'];
+        };
+
+    registry['flipper_light_read'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('V');
+            }
+            return ['VR'];
+        };
+
+    registry['flipper_oled_clear'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('N');
+            }
+            return ['NC'];
+        };
+
+    registry['flipper_oled_init'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('N');
+            }
+            return [''];
+        };
+
+    registry['flipper_rgb_blue'] = function (block, exporter) {
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('E');
+                                                                        }
+                                                                        const state = String(block.getFieldValue('STATE') || 'LOW');
+                                                                        return [state === 'HIGH' ? 'EBN' : 'EBF'];
+                                                                    };
+
+    registry['flipper_rgb_green'] = function (block, exporter) {
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('E');
+                                                                        }
+                                                                        const state = String(block.getFieldValue('STATE') || 'LOW');
+                                                                        return [state === 'HIGH' ? 'EGN' : 'EGF'];
+                                                                    };
+
+    registry['flipper_rgb_red'] = function (block, exporter) {
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('E');
+                                                                        }
+                                                                        const state = String(block.getFieldValue('STATE') || 'LOW');
+                                                                        return [state === 'HIGH' ? 'ERN' : 'ERF'];
+                                                                    };
+
+    registry['flipper_speaker_init'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('A');
+            }
+            return [''];
+        };
+
+    registry['flipper_speaker_play'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('A');
+            }
+            const voice = String(block.getFieldValue('VOICE_ID') || '');
+            const voiceMap = {
+                'HI_I_AM_EMMI': 'AP1',
+                'OBSTACLE':     'AP4'
+            };
+            return [voiceMap[voice] || 'AP1'];
+        };
+
+    registry['flipper_speaker_stop'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('A');
+            }
+            return ['AS'];
+        };
+
+    registry['flipper_touch_read'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('T');
+            }
+            const pin = String(block.getFieldValue('PIN') || '');
+            const tokenMap = { 'PIN_TOUCH': 'TR' };
+            return [tokenMap[pin] || 'TR'];
+        };
+
+    registry['flipper_ultrasonic_distance'] = function (block, exporter) {
+            return ['UR'];
+        };
+
+    registry['flipper_ultrasonic_init'] = function (block, exporter) {
+            if (exporter && typeof exporter.addInitToken === 'function') {
+                exporter.addInitToken('U');
+            }
+            return [''];
+        };
+
     registry['flipper_wheels_init'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            return [''];
-                                                        };
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('M');
+                                                                        }
+                                                                        return [''];
+                                                                    };
 
     registry['flipper_wheels_move'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            const motion = String(block.getFieldValue('MOTION') || '');
-                                                            const speed  = String(block.getFieldValue('SPEED')  || '45');
-                                                    
-                                                            // Map speed percentage to firmware ms speed value
-                                                            const speedMap = {
-                                                                '90': '250',
-                                                                '60': '500',
-                                                                '45': '750',
-                                                                '20': '1000',
-                                                                '10': '1500'
-                                                            };
-                                                            const firmwareSpeed = speedMap[speed] || '1000';
-                                                    
-                                                            const motionMap = {
-                                                                'FORWARD':  'MF',
-                                                                'BACKWARD': 'MB',
-                                                                'LEFT':     'ML',
-                                                                'RIGHT':    'MR',
-                                                                'STOP':     'MH'
-                                                            };
-                                                            const cmd = motionMap[motion];
-                                                            if (!cmd) return [''];
-                                                            if (motion === 'STOP') return ['MH'];
-                                                            return [cmd + firmwareSpeed];
-                                                        };
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('M');
+                                                                        }
+                                                                        const motion = String(block.getFieldValue('MOTION') || '');
+                                                                        const speed  = String(block.getFieldValue('SPEED')  || '45');
+                                                                
+                                                                        // Map speed percentage to firmware ms speed value
+                                                                        const speedMap = {
+                                                                            '90': '250',
+                                                                            '60': '500',
+                                                                            '45': '750',
+                                                                            '20': '1000',
+                                                                            '10': '1500'
+                                                                        };
+                                                                        const firmwareSpeed = speedMap[speed] || '1000';
+                                                                
+                                                                        const motionMap = {
+                                                                            'FORWARD':  'MF',
+                                                                            'BACKWARD': 'MB',
+                                                                            'LEFT':     'ML',
+                                                                            'RIGHT':    'MR',
+                                                                            'STOP':     'MH'
+                                                                        };
+                                                                        const cmd = motionMap[motion];
+                                                                        if (!cmd) return [''];
+                                                                        if (motion === 'STOP') return ['MH'];
+                                                                        return [cmd + firmwareSpeed];
+                                                                    };
+
+    registry['ir_detect_black'] = function (block, exporter) {
+            const side = String(block.getFieldValue('SIDE') || 'LEFT');
+            // Firmware resolves ILB/IRB as 1 (black) or 0 (white).
+            return [side === 'LEFT' ? 'ILB' : 'IRB'];
+        };
+
+    registry['ir_detect_white'] = function (block, exporter) {
+            const side = String(block.getFieldValue('SIDE') || 'LEFT');
+            // White = NOT black. Firmware resolves ILB/IRB as 1 (black) or 0 (white).
+            // Return the operand token; when used in an operator context the firmware
+            // compares the resolved value (0 = white surface detected).
+            return [side === 'LEFT' ? 'ILW' : 'IRW'];
+        };
 
     registry['linefollower_ir_left'] = function (block, exporter) {
-                                                            const pin = String(block.getFieldValue('PIN_IR') || '34');
-                                                            // Map to digital/analog pin read in expression context
-                                                            return ['D' + pin];
-                                                        };
+                                                                        const pin = String(block.getFieldValue('PIN_IR') || '34');
+                                                                        // Map to digital/analog pin read in expression context
+                                                                        return ['D' + pin];
+                                                                    };
 
     registry['linefollower_ir_right'] = function (block, exporter) {
-                                                            const pin = String(block.getFieldValue('PIN_IR') || '35');
-                                                            return ['D' + pin];
-                                                        };
+                                                                        const pin = String(block.getFieldValue('PIN_IR') || '35');
+                                                                        return ['D' + pin];
+                                                                    };
 
     registry['OLED_eyes'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('N');
-                                                            }
-                                                            const expr = String(block.getFieldValue('oled_eyes') || 'eyes1');
-                                                            return ['N' + expr];
-                                                        };
-
-    registry['otto_bendtone'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            const hz1      = String(block.getFieldValue('Hz1')      || '440');
-                                                            const hz2      = String(block.getFieldValue('Hz2')      || '880');
-                                                            const duration = String(block.getFieldValue('duration') || '500');
-                                                            return ['BF' + hz1 + '|D' + duration + '|BF' + hz2 + '|D' + duration + '|BS'];
-                                                        };
-
-    registry['otto_calibration'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            return ['MH'];
-                                                        };
-
-    registry['otto_configuration'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            return [''];
-                                                        };
-
-    registry['otto_dance'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            const movement = String(block.getFieldValue('otto_dance_movement') || '');
-                                                            const speed    = String(block.getFieldValue('otto_move_speed')    || '1000');
-                                                            const size     = String(block.getFieldValue('otto_dance_size')    || '15');
-                                                    
-                                                            const moveMap = {
-                                                                'moonwalkerLEFT':  'MML',
-                                                                'moonwalkerRIGHT': 'MMR',
-                                                                'crusaitoLEFT':    'MCL',
-                                                                'crusaitoRIGHT':   'MCR',
-                                                                'flappingFRONT':   'MFL',
-                                                                'flappingBACK':    'MFR'
-                                                            };
-                                                            const cmd = moveMap[movement];
-                                                            if (!cmd) return [''];
-                                                            return [cmd + speed + ',' + size];
-                                                        };
-
-    registry['otto_do'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            const movement = String(block.getFieldValue('otto_do_movement') || '');
-                                                            const speed    = String(block.getFieldValue('otto_move_speed')  || '1000');
-                                                            const size     = String(block.getFieldValue('otto_dance_size')  || '15');
-                                                    
-                                                            const moveMap = {
-                                                                'swing':         'MG',
-                                                                'updown':        'MU',
-                                                                'tiptoeSwing':   'MT',
-                                                                'jitter':        'MJ',
-                                                                'ascendingTurn': 'MA'
-                                                            };
-                                                            const cmd = moveMap[movement];
-                                                            if (!cmd) return [''];
-                                                            return [cmd + speed + ',' + size];
-                                                        };
-
-    registry['otto_eeprom'] = function (block, exporter) {
-                                                            return [''];
-                                                        };
-
-    registry['otto_gesture'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            const gestureVal = String(block.getFieldValue('otto_gesture') || '');
-                                                    
-                                                            const gestureMap = {
-                                                                '1':  'GSuperHappy',
-                                                                '2':  'GHappy',
-                                                                '3':  'GSad',
-                                                                '4':  'GSleeping',
-                                                                '5':  'GFart',
-                                                                '6':  'GConfused',
-                                                                '7':  'GLove',
-                                                                '8':  'GAngry',
-                                                                '9':  'GFretful',
-                                                                '10': 'GMagic',
-                                                                '11': 'GWave',
-                                                                '12': 'GVictory',
-                                                                '13': 'GFail'
-                                                            };
-                                                            return [gestureMap[gestureVal] || ''];
-                                                        };
-
-    registry['otto_home'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            return ['MH'];
-                                                        };
-
-    registry['otto_move'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            const dir   = String(block.getFieldValue('otto_move_sens')  || '');
-                                                            const speed = String(block.getFieldValue('otto_move_speed') || '1000');
-                                                    
-                                                            const dirMap = {
-                                                                'FORWARD':    'MF',
-                                                                'BACKWARD':   'MB',
-                                                                'LEFT':       'ML',
-                                                                'RIGHT':      'MR',
-                                                                'BENDLEFT':   'MBL',
-                                                                'BENDRIGHT':  'MBR',
-                                                                'SHAKELEFT':  'MSL',
-                                                                'SHAKERIGHT': 'MSR',
-                                                                'jump':       'MJ'
-                                                            };
-                                                            const cmd = dirMap[dir];
-                                                            if (!cmd) return [''];
-                                                            return [cmd + speed];
-                                                        };
-
-    registry['otto_movelegs'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            return ['MH'];
-                                                        };
-
-    registry['otto_moveservos'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            return ['MH'];
-                                                        };
-
-    registry['otto_sound'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            const soundVal = String(block.getFieldValue('otto_sound') || '');
-                                                    
-                                                            const soundMap = {
-                                                                '1':  'BPStarWars',       // connection
-                                                                '2':  'BPMissionImp',     // disconnection
-                                                                '3':  'BPPinkPanther',    // surprise
-                                                                '4':  'BPBond',           // OhOoh
-                                                                '5':  'BPTakeOnMe',       // OhOoh2
-                                                                '6':  'BPSmurfs',         // cuddly
-                                                                '7':  'BPJeopardy',       // sleeping
-                                                                '8':  'BPYMCA',           // happy
-                                                                '9':  'BPToccata',        // superHappy
-                                                                '10': 'BPIHaveADream',    // happy_short
-                                                                '11': 'BPBond',           // sad
-                                                                '12': 'BPJeopardy',       // confused
-                                                                '13': 'BPSmurfs',         // fart1
-                                                                '14': 'BPMissionImp',     // fart2
-                                                                '15': 'BPPinkPanther',    // fart3
-                                                                '16': 'BPStarWars',       // mode1
-                                                                '17': 'BPTakeOnMe',       // mode2
-                                                                '18': 'BPYMCA',           // mode3
-                                                                '19': 'BPToccata'         // buttonPushed
-                                                            };
-                                                            return [soundMap[soundVal] || ''];
-                                                        };
-
-    registry['otto_tone'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            const freq     = String(block.getFieldValue('otto_note')          || '440');
-                                                            const duration = String(block.getFieldValue('otto_note_duration') || '500');
-                                                            return ['BF' + freq + '|D' + duration + '|BS'];
-                                                        };
-
-    registry['otto_tonehz'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('B');
-                                                            }
-                                                            const freq     = String(block.getFieldValue('Hz1')      || '440');
-                                                            const duration = String(block.getFieldValue('duration') || '500');
-                                                            return ['BF' + freq + '|D' + duration + '|BS'];
-                                                        };
-
-    registry['otto9_app'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('R"EMMI"');
-                                                            }
-                                                            return [''];
-                                                        };
-
-    registry['otto9_smooth'] = function (block, exporter) {
-                                                            if (exporter && typeof exporter.addInitToken === 'function') {
-                                                                exporter.addInitToken('M');
-                                                            }
-                                                            return ['MDSM'];
-                                                        };
+                                                                        if (exporter && typeof exporter.addInitToken === 'function') {
+                                                                            exporter.addInitToken('N');
+                                                                        }
+                                                                        const expr = String(block.getFieldValue('oled_eyes') || 'eyes1');
+                                                                        return ['N' + expr];
+                                                                    };
 }(typeof window !== "undefined" ? window : globalThis));

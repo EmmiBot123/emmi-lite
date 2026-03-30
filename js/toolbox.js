@@ -439,24 +439,16 @@ function getEmmiBipedalCategories() {
     return [
         {
             "kind": "category",
-            "name": "➰ Line following",
+            "name": "📡 IR",
             "colour": "#54BCF7",
             "contents": [
                 {
                     "kind": "block",
-                    "type": "linefollower_ir_left",
-                    "fields": {
-                        "PIN_IR": "34",
-                        "OUTPUT_VALUE": "1"
-                    }
+                    "type": "ir_detect_white"
                 },
                 {
                     "kind": "block",
-                    "type": "linefollower_ir_right",
-                    "fields": {
-                        "PIN_IR": "35",
-                        "OUTPUT_VALUE": "1"
-                    }
+                    "type": "ir_detect_black"
                 }
             ]
         },
@@ -479,13 +471,43 @@ function getEmmiBipedalCategories() {
             "kind": "category",
             "name": "👓 Ultrasonic",
             "colour": "#54BCF7",
-            "contents": []
+            "contents": [
+                {
+                    "kind": "block",
+                    "type": "flipper_ultrasonic_init",
+                    "fields": {
+                        "US_NUMBER": "1",
+                        "PIN_TRIG": "25",
+                        "PIN_ECHO": "33"
+                    }
+                },
+                {
+                    "kind": "block",
+                    "type": "flipper_ultrasonic_distance",
+                    "fields": {
+                        "US_NUMBER": "1"
+                    }
+                }
+            ]
         },
         {
             "kind": "category",
             "name": "🚥 RGB",
             "colour": "#00838F",
-            "contents": []
+            "contents": [
+                {
+                    "kind": "block",
+                    "type": "flipper_rgb_red"
+                },
+                {
+                    "kind": "block",
+                    "type": "flipper_rgb_green"
+                },
+                {
+                    "kind": "block",
+                    "type": "flipper_rgb_blue"
+                }
+            ]
         },
         {
             "kind": "category",
@@ -494,7 +516,15 @@ function getEmmiBipedalCategories() {
             "contents": [
                 {
                     "kind": "block",
+                    "type": "flipper_oled_init"
+                },
+                {
+                    "kind": "block",
                     "type": "OLED_eyes"
+                },
+                {
+                    "kind": "block",
+                    "type": "flipper_oled_clear"
                 }
             ]
         },
@@ -502,94 +532,68 @@ function getEmmiBipedalCategories() {
             "kind": "category",
             "name": "👉 Touch",
             "colour": "#FFC107",
-            "contents": []
+            "contents": [
+                {
+                    "kind": "block",
+                    "type": "flipper_touch_read"
+                }
+            ]
         },
         {
             "kind": "category",
             "name": "💡 Light",
             "colour": "#FFA726",
-            "contents": []
+            "contents": [
+                {
+                    "kind": "block",
+                    "type": "flipper_light_read"
+                }
+            ]
         },
         {
             "kind": "category",
             "name": "🔊 Speaker",
             "colour": "#FF63BB",
-            "contents": []
-        },
-        {
-            "kind": "category",
-            "name": "🔊 Buzzer",
-            "colour": "#E91E63",
-            "contents": []
-        },
-        {
-            "kind": "category",
-            "name": "🧩 Uncategorized",
-            "colour": "#616161",
             "contents": [
                 {
                     "kind": "block",
-                    "type": "otto_configuration"
+                    "type": "flipper_speaker_init"
                 },
                 {
                     "kind": "block",
-                    "type": "otto_home"
+                    "type": "flipper_speaker_play"
                 },
                 {
                     "kind": "block",
-                    "type": "otto_calibration"
+                    "type": "flipper_speaker_stop"
                 },
                 {
                     "kind": "block",
-                    "type": "otto_eeprom"
+                    "type": "flipper_buzzer_rtttl",
+                    "fields": {
+                        "PIN": "26"
+                    }
                 },
                 {
                     "kind": "block",
-                    "type": "otto_movelegs"
+                    "type": "flipper_buzzer_note",
+                    "fields": {
+                        "PIN": "26"
+                    }
                 },
                 {
                     "kind": "block",
-                    "type": "otto_moveservos"
+                    "type": "flipper_buzzer_tone",
+                    "fields": {
+                        "PIN": "26"
+                    }
                 },
                 {
                     "kind": "block",
-                    "type": "otto_move"
-                },
-                {
-                    "kind": "block",
-                    "type": "otto_dance"
-                },
-                {
-                    "kind": "block",
-                    "type": "otto_do"
-                },
-                {
-                    "kind": "block",
-                    "type": "otto9_smooth"
-                },
-                {
-                    "kind": "block",
-                    "type": "otto_gesture"
-                },
-                {
-                    "kind": "block",
-                    "type": "otto_sound"
-                },
-                {
-                    "kind": "block",
-                    "type": "otto_tone"
-                },
-                {
-                    "kind": "block",
-                    "type": "otto_tonehz"
-                },
-                {
-                    "kind": "block",
-                    "type": "otto_bendtone"
-                },
-                {
-                    "kind": "block",
-                    "type": "otto9_app"
+                    "type": "flipper_buzzer_stop",
+                    "fields": {
+                        "PIN": "26"
+                    }
                 }
             ]
         }
@@ -1306,6 +1310,13 @@ function getBoardFirmwareConfig() {
             "bootloaderUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-bipedal/bootloader.bin",
             "bootappUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-bipedal/boot_app0.bin",
             "versionUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-bipedal/version.txt"
+        },
+        "emmi-bipedal": {
+            "firmwareUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-flipper/firmware.bin",
+            "partitionsUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-flipper/partitions.bin",
+            "bootloaderUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-flipper/bootloader.bin",
+            "bootappUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-flipper/boot_app0.bin",
+            "versionUrl": "https://emmi-lite-firmware.s3.us-east-1.amazonaws.com/emmi-flipper/version.txt"
         }
     };
 }

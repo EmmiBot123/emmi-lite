@@ -190,3 +190,23 @@ pythonGenerator.forBlock['emmi_eyes_digital'] = function(block) {
   pythonGenerator.definitions_['setup_eye_' + pinNum] = pinVar + ' = Pin(' + pinNum + ', Pin.OUT)';
   return pinVar + '.value(' + pyVal + ')\n';
 };
+
+// ─── IR DETECT WHITE ──────────────────────────────────────────────────────────
+pythonGenerator.forBlock['ir_detect_white'] = function(block) {
+  pythonGenerator.imports_['machine_adc'] = 'from machine import ADC, Pin';
+  const side = block.getFieldValue('SIDE');
+  const pin = (side === 'LEFT') ? '34' : '35';
+  pythonGenerator.definitions_['ir_adc_' + pin] = 'ir_' + pin + ' = ADC(Pin(' + pin + '))\nir_' + pin + '.atten(ADC.ATTN_11DB)';
+  var code = '(ir_' + pin + '.read() >= 3500)';
+  return [code, pythonGenerator.ORDER_ATOMIC];
+};
+
+// ─── IR DETECT BLACK ──────────────────────────────────────────────────────────
+pythonGenerator.forBlock['ir_detect_black'] = function(block) {
+  pythonGenerator.imports_['machine_adc'] = 'from machine import ADC, Pin';
+  const side = block.getFieldValue('SIDE');
+  const pin = (side === 'LEFT') ? '34' : '35';
+  pythonGenerator.definitions_['ir_adc_' + pin] = 'ir_' + pin + ' = ADC(Pin(' + pin + '))\nir_' + pin + '.atten(ADC.ATTN_11DB)';
+  var code = '(ir_' + pin + '.read() < 3500)';
+  return [code, pythonGenerator.ORDER_ATOMIC];
+};

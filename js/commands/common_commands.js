@@ -9,9 +9,9 @@
     const registry = globalScope.emmiCommandGenerator.forBlock;
 
     registry['esp32_digital_state'] = function (block, exporter) {
-                                                                                const pin = String(block.getFieldValue('PIN') || '');
-                                                                        
-                                                                                const tokenMap = { 'GREEN': 'EGN', 'BLUE': 'EBN', 'RED': 'ERN', 'MIC': 'MRP', 'BUZZER': 'BPF', 'TOUCH': 'TR' };
-                                                                                return [tokenMap[pin] || ''];
-                                                                            };
+                                                                                            const pin = String(block.getFieldValue('PIN') || '');
+                                                                                    
+                                                                                            const tokenMap = { 'GREEN': 'EGN', 'BLUE': 'EBN', 'RED': 'ERN', 'MIC': 'MRP', 'BUZZER': 'BPF', 'TOUCH': 'TR' };
+                                                                                            return [tokenMap[pin] || ''];
+                                                                                        };
 }(typeof window !== "undefined" ? window : globalThis));

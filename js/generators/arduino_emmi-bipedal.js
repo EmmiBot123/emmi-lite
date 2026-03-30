@@ -222,6 +222,24 @@ arduinoGenerator.forBlock['linefollower_ir_right'] = function(block) {
   return [code, arduinoGenerator.ORDER_ATOMIC];
 };
 
+// ─── IR DETECT WHITE ──────────────────────────────────────────────────────────
+arduinoGenerator.forBlock['ir_detect_white'] = function(block) {
+  var side = block.getFieldValue('SIDE');
+  var pin = (side === 'LEFT') ? '34' : '35';
+  arduinoGenerator.setupCode_['setup_analogResolutionESP32'] = 'analogReadResolution(12);\n';
+  var code = '(analogRead(' + pin + ') >= 3500)';
+  return [code, arduinoGenerator.ORDER_ATOMIC];
+};
+
+// ─── IR DETECT BLACK ──────────────────────────────────────────────────────────
+arduinoGenerator.forBlock['ir_detect_black'] = function(block) {
+  var side = block.getFieldValue('SIDE');
+  var pin = (side === 'LEFT') ? '34' : '35';
+  arduinoGenerator.setupCode_['setup_analogResolutionESP32'] = 'analogReadResolution(12);\n';
+  var code = '(analogRead(' + pin + ') < 3500)';
+  return [code, arduinoGenerator.ORDER_ATOMIC];
+};
+
 // ─── FLIPPER WHEELS INIT ──────────────────────────────────────────────────────
 arduinoGenerator.forBlock['flipper_wheels_init'] = function(block) {
   arduinoGenerator.includes_['otto9_wheels'] =
@@ -267,3 +285,134 @@ arduinoGenerator.forBlock['emmi_eyes_digital'] = function(block) {
   arduinoGenerator.setupCode_['setup_eye_' + pinNum] = 'pinMode(' + pinNum + ', OUTPUT);';
   return 'digitalWrite(' + pinNum + ', ' + state + ');\n';
 };
+
+// ─── FLIPPER OLED INIT ────────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_oled_init'] = function(block) {
+  arduinoGenerator.includes_['oled_lib'] =
+    '#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SH110X.h>';
+  arduinoGenerator.definitions_['oled_obj'] =
+    'Adafruit_SH1106G display = Adafruit_SH1106G(128, 64, &Wire, -1);';
+  arduinoGenerator.setupCode_['oled_init'] =
+    'Wire.begin(21, 22);\ndisplay.begin(0x3C, true);\ndisplay.clearDisplay();\ndisplay.display();';
+  return '';
+};
+
+// ─── FLIPPER OLED CLEAR ───────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_oled_clear'] = function(block) {
+  return 'display.clearDisplay();\ndisplay.display();\n';
+};
+
+// ─── FLIPPER RGB RED ──────────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_rgb_red'] = function(block) {
+  var state = block.getFieldValue('STATE');
+  arduinoGenerator.setupCode_['setup_rgb_red'] = 'pinMode(18, OUTPUT);';
+  return 'digitalWrite(18, ' + state + ');\n';
+};
+
+// ─── FLIPPER RGB GREEN ────────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_rgb_green'] = function(block) {
+  var state = block.getFieldValue('STATE');
+  arduinoGenerator.setupCode_['setup_rgb_green'] = 'pinMode(17, OUTPUT);';
+  return 'digitalWrite(17, ' + state + ');\n';
+};
+
+// ─── FLIPPER RGB BLUE ─────────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_rgb_blue'] = function(block) {
+  var state = block.getFieldValue('STATE');
+  arduinoGenerator.setupCode_['setup_rgb_blue'] = 'pinMode(19, OUTPUT);';
+  return 'digitalWrite(19, ' + state + ');\n';
+};
+
+// ─── FLIPPER ULTRASONIC INIT ──────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_ultrasonic_init'] = function(block) {
+  var num  = block.getFieldValue('US_NUMBER');
+  var trig = block.getFieldValue('PIN_TRIG');
+  var echo = block.getFieldValue('PIN_ECHO');
+  arduinoGenerator.definitions_['us_vars_' + num] =
+    'const int trigPin' + num + ' = ' + trig + ';\nconst int echoPin' + num + ' = ' + echo + ';';
+  arduinoGenerator.setupCode_['us_setup_' + num] =
+    'pinMode(trigPin' + num + ', OUTPUT);\npinMode(echoPin' + num + ', INPUT);';
+  return '';
+};
+
+// ─── FLIPPER ULTRASONIC DISTANCE ──────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_ultrasonic_distance'] = function(block) {
+  var num = block.getFieldValue('US_NUMBER');
+  arduinoGenerator.definitions_['us_dist_fn_' + num] =
+    'long getDistance' + num + '() {\n'
+    + '  digitalWrite(trigPin' + num + ', LOW); delayMicroseconds(2);\n'
+    + '  digitalWrite(trigPin' + num + ', HIGH); delayMicroseconds(10);\n'
+    + '  digitalWrite(trigPin' + num + ', LOW);\n'
+    + '  long dur = pulseIn(echoPin' + num + ', HIGH);\n'
+    + '  return dur * 0.034 / 2;\n'
+    + '}';
+  return ['getDistance' + num + '()', arduinoGenerator.ORDER_ATOMIC];
+};
+
+// ─── FLIPPER TOUCH READ ───────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_touch_read'] = function(block) {
+  var pin = block.getFieldValue('PIN');
+  var pinNum = (pin === 'PIN_TOUCH') ? '32' : pin;
+  arduinoGenerator.setupCode_['setup_touch_' + pinNum] = 'pinMode(' + pinNum + ', INPUT);';
+  return ['digitalRead(' + pinNum + ')', arduinoGenerator.ORDER_ATOMIC];
+};
+
+// ─── FLIPPER LIGHT READ ───────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_light_read'] = function(block) {
+  var pin = block.getFieldValue('PIN');
+  var pinNum = (pin === 'LDR') ? '34' : pin;
+  arduinoGenerator.setupCode_['setup_analogResolutionESP32'] = 'analogReadResolution(12);';
+  return ['analogRead(' + pinNum + ')', arduinoGenerator.ORDER_ATOMIC];
+};
+
+// ─── FLIPPER SPEAKER INIT ─────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_speaker_init'] = function(block) {
+  arduinoGenerator.includes_['flipper_speaker'] = '#include "AudioOutput.h"';
+  arduinoGenerator.setupCode_['flipper_speaker_init'] = 'audioInit();';
+  return '';
+};
+
+// ─── FLIPPER SPEAKER PLAY ─────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_speaker_play'] = function(block) {
+  var voiceId = block.getFieldValue('VOICE_ID');
+  return 'audioPlay("' + voiceId + '");\n';
+};
+
+// ─── FLIPPER SPEAKER STOP ─────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_speaker_stop'] = function(block) {
+  return 'audioStop();\n';
+};
+
+// ─── FLIPPER BUZZER RTTTL ─────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_buzzer_rtttl'] = function(block) {
+  var pin = block.getFieldValue('PIN');
+  var melody = block.getFieldValue('MELODY');
+  arduinoGenerator.includes_['flipper_buzzer'] = '#include <Buzzer.h>';
+  arduinoGenerator.definitions_['flipper_buzzer_obj'] = 'Buzzer buzzer(' + pin + ');';
+  return 'buzzer.playRtttl("' + melody + '");\n';
+};
+
+// ─── FLIPPER BUZZER NOTE ──────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_buzzer_note'] = function(block) {
+  var pin = block.getFieldValue('PIN');
+  var note = block.getFieldValue('NOTE');
+  var tempo = block.getFieldValue('TEMPO');
+  arduinoGenerator.includes_['flipper_buzzer'] = '#include <Buzzer.h>';
+  arduinoGenerator.definitions_['flipper_buzzer_obj'] = 'Buzzer buzzer(' + pin + ');';
+  return 'tone(' + pin + ', ' + note + ', ' + tempo + ');\ndelay(' + tempo + ');\nnoTone(' + pin + ');\n';
+};
+
+// ─── FLIPPER BUZZER TONE ──────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_buzzer_tone'] = function(block) {
+  var pin = block.getFieldValue('PIN');
+  var freq = block.getFieldValue('FREQ');
+  var duration = block.getFieldValue('DURATION');
+  return 'tone(' + pin + ', ' + freq + ', ' + duration + ');\ndelay(' + duration + ');\nnoTone(' + pin + ');\n';
+};
+
+// ─── FLIPPER BUZZER STOP ──────────────────────────────────────────────────────
+arduinoGenerator.forBlock['flipper_buzzer_stop'] = function(block) {
+  var pin = block.getFieldValue('PIN');
+  return 'noTone(' + pin + ');\n';
+};
+
